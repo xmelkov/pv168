@@ -58,4 +58,23 @@ public class Agent {
     public void setAlive(boolean alive) {
         this.alive = alive;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof Agent)) {
+            return false;
+        }
+
+        Agent agent = (Agent) o;
+
+        return id == agent.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
 }

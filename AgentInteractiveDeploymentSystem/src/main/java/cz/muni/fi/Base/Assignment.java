@@ -51,4 +51,23 @@ public class Assignment {
     public void setMission(Mission mission) {
         this.mission = mission;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof Assignment)) {
+            return false;
+        }
+
+        Assignment that = (Assignment) o;
+
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
 }
