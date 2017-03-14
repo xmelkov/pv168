@@ -141,13 +141,14 @@ public class AgentManagerImplTest {
                 originalAgent.getPhoneNumber(),originalAgent.isAlive());
     }
 
-    private void assertDeepEquals(Agent agentOne,Agent agentTwo) {
-        assertEquals(agentOne.getId(),agentTwo.getId());
-        assertEquals(agentOne.getAge(),agentTwo.getAge());
-        assertEquals(agentOne.getGender(),agentTwo.getGender());
-        assertEquals(agentOne.getPhoneNumber(),agentTwo.getPhoneNumber());
-        assertEquals(agentOne.getName(),agentTwo.getName());
-        assertEquals(agentOne.isAlive(),agentTwo.isAlive());
+    private void assertDeepEquals(Agent originalAgent,Agent expectedAgent) {
+        assertNotNull(expectedAgent);
+        assertEquals(originalAgent.getId(),expectedAgent.getId());
+        assertEquals(originalAgent.getAge(),expectedAgent.getAge());
+        assertEquals(originalAgent.getGender(),expectedAgent.getGender());
+        assertEquals(originalAgent.getPhoneNumber(),expectedAgent.getPhoneNumber());
+        assertEquals(originalAgent.getName(),expectedAgent.getName());
+        assertEquals(originalAgent.isAlive(),expectedAgent.isAlive());
     }
     private void assertDeepEquals(List<Agent> expected, List<Agent> actual) {
         assertEquals(expected.size(),actual.size());

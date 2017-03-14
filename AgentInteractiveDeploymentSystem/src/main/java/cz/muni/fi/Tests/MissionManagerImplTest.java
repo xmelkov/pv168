@@ -1,5 +1,6 @@
 package cz.muni.fi.Tests;
 
+import cz.muni.fi.Base.Mission;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,21 +20,20 @@ public class MissionManagerImplTest {
 
     @Test
     public void createMission() throws Exception {
+        assertTrue(manager.findAllMissions().isEmpty());
+        Mission mission = newMission(25,"Eliminate mysterious inteloper with no chin",
+                (short)1,100,"Seattle",true);
+        manager.createMission(mission);
+        assertFalse(manager.findAllMissions().isEmpty());
 
-    }
+        long id = mission.getId();
+        assertFalse(id == 0);
 
-    @Test
-    public void createMission() throws Exception {
 
     }
 
     @Test
     public void findMissionById() throws Exception {
-
-    }
-
-    @Test
-    public void findAllMissions() throws Exception {
 
     }
 
@@ -47,4 +47,26 @@ public class MissionManagerImplTest {
 
     }
 
+    private static Mission newMission(long id,String description, short requiredAgents,
+                              int difficulty,String place,boolean successful) {
+        Mission mission = new Mission();
+        mission.setId(id);
+        mission.setDescription(description);
+        mission.setNumberOfRequiredAgents(requiredAgents);
+        mission.setDifficulty(difficulty);
+        mission.setPlace(place);
+        mission.setSuccessful(successful);
+        return mission;
+    }
+
+    private static Mission newMission(Mission originalMission) {
+        return newMission(originalMission.getId(),originalMission.getDescription(),
+                originalMission.getNumberOfRequiredAgents(),originalMission.getDifficulty(),originalMission.getPlace(),
+                originalMission.isSuccessful());
+    }
+
+    private void assertDeepEquals(Mission originalMission, Mission expectedMission) {
+        assertNotNull(expectedMission);
+        //asser
+    }
 }
