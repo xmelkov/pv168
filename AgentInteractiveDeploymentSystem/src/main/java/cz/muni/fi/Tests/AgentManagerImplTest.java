@@ -2,6 +2,8 @@ package cz.muni.fi.Tests;
 
 import cz.muni.fi.Base.Agent;
 import cz.muni.fi.ManagersImpl.AgentManagerImpl;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,17 +11,18 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Created by xmelkov on 14.03.2017.
+ * Created by Samuel on 14.03.2017.
  */
 public class AgentManagerImplTest {
+
     private AgentManagerImpl manager;
 
-    @org.junit.Before
+    @Before
     public void setUp() throws Exception {
         manager = new AgentManagerImpl();
     }
 
-    @org.junit.Test
+    @Test
     public void createAgent() throws Exception {
         assertTrue(manager.findAllAgents().isEmpty());
         Agent agent = newAgent(666,"Franku", (short) 6,(short) 22,"+421 988 666 690",true);
@@ -35,35 +38,38 @@ public class AgentManagerImplTest {
         assertDeepEquals(agent,foundAgent);
     }
 
-    @org.junit.Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void createAgentWithEmptyName() {
         Agent agent = newAgent(666,"", (short) 6,(short) 25,"+421 000 000 000",true);
         manager.createAgent(agent);
     }
 
-    @org.junit.Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void createAgentWithoutPhoneNumber() {
         Agent agent = newAgent(666,"Keemstar", (short) 6,(short) 36,"",true);
         manager.createAgent(agent);
     }
 
 
-    @org.junit.Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void createAgentUnderAge() {
         Agent agent = newAgent(666,"Jacob Sartorius", (short) 6,(short) 10,
                 "+421 123 456 789",true);
         manager.createAgent(agent);
     }
 
-    @org.junit.Test(expected = IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void createNullAgent() {
         manager.createAgent(null);
     }
 
-    @org.junit.Test
+
+    @Test
     public void findAllAgents() throws Exception {
         assertTrue(manager.findAllAgents().isEmpty());
-        Agent felix = newAgent(666, "Felix Kjellberg", (short) 3,(short) 25, "0123456789",true);
+        Agent felix = newAgent(666, "Felix Kjellberg", (short) 3,(short) 25,
+                "0123456789",true);
         manager.createAgent(felix);
         assertFalse(manager.findAllAgents().isEmpty());
 
@@ -80,7 +86,7 @@ public class AgentManagerImplTest {
         assertDeepEquals(agentz,manager.findAllAgents());
     }
 
-    @org.junit.Test
+    @Test
     public void updateAgent() throws Exception {
         Agent agent = newAgent(666,"Senpai", (short) 6,(short) 25,"+421 147 852 369",true);
         manager.createAgent(agent);
@@ -102,13 +108,12 @@ public class AgentManagerImplTest {
 
     }
 
-
-    @org.junit.Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void updateNullAgent() {
         manager.updateAgent(null);
     }
 
-    @org.junit.Test
+    @Test
     public void deleteAgent() throws Exception {
         assertTrue(manager.findAllAgents().isEmpty());
         Agent jackie = newAgent(1,"Jackie Chen",(short)1,(short) 120,"159 789 456",true);
@@ -119,6 +124,7 @@ public class AgentManagerImplTest {
         manager.deleteAgent(jackie);
         assertTrue(manager.findAllAgents().isEmpty());
     }
+
     private static Agent newAgent(long id, String name, short gender, short age, String phoneNumber, boolean alive) {
         Agent agent = new Agent();
         agent.setId(id);
@@ -151,4 +157,5 @@ public class AgentManagerImplTest {
             assertDeepEquals(expectedAgent,actualAgent);
         }
     }
+
 }
