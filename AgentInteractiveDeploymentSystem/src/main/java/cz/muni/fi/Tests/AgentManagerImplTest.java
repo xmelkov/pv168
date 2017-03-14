@@ -9,7 +9,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Created by Samuel on 14.03.2017.
+ * Created by xmelkov on 14.03.2017.
  */
 public class AgentManagerImplTest {
     private AgentManagerImpl manager;
