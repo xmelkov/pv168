@@ -5,6 +5,8 @@ import cz.muni.fi.ManagersImpl.MissionManagerImpl;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 /**
@@ -67,6 +69,18 @@ public class MissionManagerImplTest {
 
     private void assertDeepEquals(Mission originalMission, Mission expectedMission) {
         assertNotNull(expectedMission);
-        //asser
+        assertEquals(originalMission.getId(),expectedMission.getId());
+        assertEquals(originalMission.getDescription(),expectedMission.getDescription());
+        assertEquals(originalMission.getNumberOfRequiredAgents(),expectedMission.getNumberOfRequiredAgents());
+        assertEquals(originalMission.getDifficulty(),expectedMission.getDifficulty());
+        assertEquals(originalMission.getPlace(),expectedMission.getPlace());
+        assertEquals(originalMission.isSuccessful(),expectedMission.isSuccessful());
+    }
+
+    private void assertDeepEquals(List<Mission> expectedList, List<Mission> originalList) {
+        assertEquals(expectedList.size(),originalList.size());
+        for (int i = 0 ; i < originalList.size() ; ++i) {
+            assertDeepEquals(expectedList.get(i),originalList.get(i));
+        }
     }
 }
