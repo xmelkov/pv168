@@ -1,5 +1,6 @@
 package cz.muni.fi.Tests;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import cz.muni.fi.Base.Mission;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
 import org.junit.Before;
@@ -31,22 +32,51 @@ public class MissionManagerImplTest {
         long id = mission.getId();
         assertFalse(id == 0);
 
-
+        Mission created = manager.findMissionById(id);
+        assertNotNull(created);
+        assertNotSame(mission,created);
+        assertDeepEquals(mission,created);
     }
 
-    @Test
-    public void findMissionById() throws Exception {
-
+    @Test(expected = InvalidArgumentException.class)
+    public void createMissionWithoutDescription() {
+        Mission mission = newMission(69,"",
+                (short)1,15,"Brno",true);
+        manager.createMission(mission);
     }
 
     @Test
     public void updateMission() throws Exception {
+        Mission originalMission = newMission(44,"Prank some1 really good", (short) 3, 44,
+                "Auschwitz",true);
+        manager.createMission(originalMission);
+        assertFalse(manager.findAllMissions().isEmpty());
+        assertDeepEquals(originalMission,manager.findMissionById(originalMission.getId()));
+
+        Mission update1 = newMission(originalMission);
+        update1.setDescription("Hey thats pretty good!");
+        manager.updateMission(update1);
+        assertDeepEquals(update1,manager.findMissionById(update1.getId()));
+
+        Mission update2 = newMission(update1);
+        update2.setDescription("Bake some tasty hair cake");
+        update2.setPlace("Afghanistan");
+        assertDeepEquals(update1,manager.findMissionById(update1.getId()));
+        manager.updateMission(update2);
+        assertDeepEquals(update2,manager.findMissionById(update2.getId()));
 
     }
 
     @Test
     public void deleteMission() throws Exception {
-
+        assertTrue(manager.findAllMissions().isEmpty());
+        Mission mission = newMission(22,"Assasinate killer Keemstar",
+                (short)3,88,"Buffalo",true);
+        manager.createMission(mission);
+        assertFalse(manager.findAllMissions().isEmpty());
+        assertNotNull(manager.findMissionById(mission.getId()));
+        manager.deleteMission(mission);
+        assertTrue(manager.findAllMissions().isEmpty());
     }
 
     private static Mission newMission(long id,String description, short requiredAgents,
