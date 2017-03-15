@@ -25,7 +25,7 @@ public class AgentManagerImplTest {
     @Test
     public void createAgent() throws Exception {
         assertTrue(manager.findAllAgents().isEmpty());
-        Agent agent = newAgent(666,"Franku", (short) 6,(short) 22,"+421 988 666 690",true);
+        Agent agent = newAgent("Franku", (short) 6,(short) 22,"+421 988 666 690",true);
         manager.createAgent(agent);
 
         long agentId = agent.getId();
@@ -40,20 +40,20 @@ public class AgentManagerImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createAgentWithEmptyName() {
-        Agent agent = newAgent(666,"", (short) 6,(short) 25,"+421 000 000 000",true);
+        Agent agent = newAgent("", (short) 6,(short) 25,"+421 000 000 000",true);
         manager.createAgent(agent);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createAgentWithoutPhoneNumber() {
-        Agent agent = newAgent(666,"Keemstar", (short) 6,(short) 36,"",true);
+        Agent agent = newAgent("Keemstar", (short) 6,(short) 36,"",true);
         manager.createAgent(agent);
     }
 
 
     @Test(expected = IllegalArgumentException.class)
     public void createAgentUnderAge() {
-        Agent agent = newAgent(666,"Jacob Sartorius", (short) 6,(short) 10,
+        Agent agent = newAgent("Jacob Sartorius", (short) 6,(short) 10,
                 "+421 123 456 789",true);
         manager.createAgent(agent);
     }
@@ -68,12 +68,12 @@ public class AgentManagerImplTest {
     @Test
     public void findAllAgents() throws Exception {
         assertTrue(manager.findAllAgents().isEmpty());
-        Agent felix = newAgent(666, "Felix Kjellberg", (short) 3,(short) 25,
+        Agent felix = newAgent( "Felix Kjellberg", (short) 3,(short) 25,
                 "0123456789",true);
         manager.createAgent(felix);
         assertFalse(manager.findAllAgents().isEmpty());
 
-        Agent shrek = newAgent(667, "Shrek", (short) 4,(short) 19, "0123456788",true);
+        Agent shrek = newAgent("Shrek", (short) 4,(short) 19, "0123456788",true);
         manager.createAgent(shrek);
 
         int expectedSize = 2;
@@ -88,7 +88,7 @@ public class AgentManagerImplTest {
 
     @Test
     public void updateAgent() throws Exception {
-        Agent agent = newAgent(666,"Senpai", (short) 6,(short) 25,"+421 147 852 369",true);
+        Agent agent = newAgent("Senpai", (short) 6,(short) 25,"+421 147 852 369",true);
         manager.createAgent(agent);
 
         Agent update1 = newAgent(agent);
@@ -116,7 +116,7 @@ public class AgentManagerImplTest {
     @Test
     public void deleteAgent() throws Exception {
         assertTrue(manager.findAllAgents().isEmpty());
-        Agent jackie = newAgent(1,"Jackie Chen",(short)1,(short) 120,"159 789 456",true);
+        Agent jackie = newAgent("Jackie Chen",(short)1,(short) 120,"159 789 456",true);
 
         manager.createAgent(jackie);
         assertFalse(manager.findAllAgents().isEmpty());
@@ -125,9 +125,8 @@ public class AgentManagerImplTest {
         assertTrue(manager.findAllAgents().isEmpty());
     }
 
-    private static Agent newAgent(long id, String name, short gender, short age, String phoneNumber, boolean alive) {
+    private static Agent newAgent(String name, short gender, short age, String phoneNumber, boolean alive) {
         Agent agent = new Agent();
-        agent.setId(id);
         agent.setName(name);
         agent.setGender(gender);
         agent.setAge(age);
@@ -137,7 +136,7 @@ public class AgentManagerImplTest {
     }
 
     private static Agent newAgent(Agent originalAgent) {
-        return newAgent(originalAgent.getId(),originalAgent.getName(),originalAgent.getGender(),originalAgent.getAge(),
+        return newAgent(originalAgent.getName(),originalAgent.getGender(),originalAgent.getAge(),
                 originalAgent.getPhoneNumber(),originalAgent.isAlive());
     }
 

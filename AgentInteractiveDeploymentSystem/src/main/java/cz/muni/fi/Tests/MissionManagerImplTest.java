@@ -24,7 +24,7 @@ public class MissionManagerImplTest {
     @Test
     public void createMission() throws Exception {
         assertTrue(manager.findAllMissions().isEmpty());
-        Mission mission = newMission(25,"Eliminate mysterious inteloper with no chin",
+        Mission mission = newMission("Eliminate mysterious inteloper with no chin",
                 (short)1,100,"Seattle",true);
         manager.createMission(mission);
         assertFalse(manager.findAllMissions().isEmpty());
@@ -40,14 +40,13 @@ public class MissionManagerImplTest {
 
     @Test(expected = InvalidArgumentException.class)
     public void createMissionWithoutDescription() {
-        Mission mission = newMission(69,"",
-                (short)1,15,"Brno",true);
+        Mission mission = newMission("",(short)1,15,"Brno",true);
         manager.createMission(mission);
     }
 
     @Test
     public void updateMission() throws Exception {
-        Mission originalMission = newMission(44,"Prank some1 really good", (short) 3, 44,
+        Mission originalMission = newMission("Prank some1 really good", (short) 3, 44,
                 "Auschwitz",true);
         manager.createMission(originalMission);
         assertFalse(manager.findAllMissions().isEmpty());
@@ -70,7 +69,7 @@ public class MissionManagerImplTest {
     @Test
     public void deleteMission() throws Exception {
         assertTrue(manager.findAllMissions().isEmpty());
-        Mission mission = newMission(22,"Assasinate killer Keemstar",
+        Mission mission = newMission("Assasinate killer Keemstar",
                 (short)3,88,"Buffalo",true);
         manager.createMission(mission);
         assertFalse(manager.findAllMissions().isEmpty());
@@ -79,10 +78,9 @@ public class MissionManagerImplTest {
         assertTrue(manager.findAllMissions().isEmpty());
     }
 
-    private static Mission newMission(long id,String description, short requiredAgents,
+    private static Mission newMission(String description, short requiredAgents,
                               int difficulty,String place,boolean successful) {
         Mission mission = new Mission();
-        mission.setId(id);
         mission.setDescription(description);
         mission.setNumberOfRequiredAgents(requiredAgents);
         mission.setDifficulty(difficulty);
@@ -92,9 +90,8 @@ public class MissionManagerImplTest {
     }
 
     private static Mission newMission(Mission originalMission) {
-        return newMission(originalMission.getId(),originalMission.getDescription(),
-                originalMission.getNumberOfRequiredAgents(),originalMission.getDifficulty(),originalMission.getPlace(),
-                originalMission.isSuccessful());
+        return newMission(originalMission.getDescription(),originalMission.getNumberOfRequiredAgents(),
+                originalMission.getDifficulty(),originalMission.getPlace(),originalMission.isSuccessful());
     }
 
     private void assertDeepEquals(Mission originalMission, Mission expectedMission) {
