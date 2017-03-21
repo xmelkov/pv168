@@ -5,16 +5,15 @@ import cz.muni.fi.Base.Assignment;
 import cz.muni.fi.Base.Mission;
 import cz.muni.fi.ManagersImpl.AssignmentManagerImpl;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
-import java.util.ArrayList;
+import java.time.*;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Created by Samuel on 14.03.2017.
@@ -27,222 +26,182 @@ public class AssignmentManagerImplTest {
         manager = new AssignmentManagerImpl();
     }
 
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    private final static LocalDateTime START
+            = LocalDateTime.of(2016, Month.FEBRUARY, 29, 14, 00);
+
+    private final static LocalDateTime END
+            = LocalDateTime.of(2017, Month.MARCH, 14, 14, 00);
+
+    private MissionBuilder noChinMission() {
+        return new MissionBuilder()
+                .id(1L)
+                .description("Eliminate mysterious inteloper with no chin")
+                .numberOfRequiredAgents((short) 1)
+                .difficulty(100)
+                .place("Seattle")
+                .successful(true);
+    }
+
+    private MissionBuilder prankMission() {
+        return new MissionBuilder()
+                .id(2L)
+                .description("Prank some1 really good")
+                .numberOfRequiredAgents((short) 3)
+                .difficulty(44)
+                .place("Poland")
+                .successful(true);
+    }
+
+    private AgentBuilder agentKeemstar() {
+        return new AgentBuilder()
+                .id(1L)
+                .name("Keemstar")
+                .gender((short) 6)
+                .age((short) 36)
+                .phoneNumber("+421 999 888 777")
+                .alive(true);
+    }
+
+    private AgentBuilder agentShrek() {
+        return new AgentBuilder()
+                .id(2L)
+                .name("Shrek")
+                .gender((short) 4)
+                .age((short) 19)
+                .phoneNumber("0123456788")
+                .alive(true);
+    }
+
+    private AssignmentBuilder shrekPrankAssignment() {
+        return new AssignmentBuilder()
+                .id(null)
+                .start(START)
+                .end(END)
+                .agent(agentShrek().build())
+                .mission(prankMission().build());
+    }
+
+    private AssignmentBuilder keemstarNoChinAssignment() {
+        return new AssignmentBuilder()
+                .id(null)
+                .start(START)
+                .end(END)
+                .agent(agentKeemstar().build())
+                .mission(noChinMission().build());
+    }
+
     @Test
     public void createAssignment() throws Exception {
-        Agent mufasa = newAgent("Mufasa", (short)3, (short)9, "999 999 999", true);
-        Mission defeatScar = newMission(
-                "Scar is plotting against the one and only great Mufasa and Mufasa has to stop him at all cost",
-                (short)1, 9, "Lion King", true);
-
-        Assignment assignment = newAssignment(LocalDateTime.now(),
-                LocalDateTime.of(LocalDate.of(2017, Month.APRIL, 4), LocalTime.of(19, 0)), mufasa, defeatScar);
-
+        Assignment assignment = shrekPrankAssignment().build();
         manager.createAssignment(assignment);
-        Long assignmentId = assignment.getId();
-        assertNotNull(assignmentId);
-        Assignment result = manager.findAssignmentById(assignmentId);
-        assertEquals(assignment, result);
-        assertNotSame(assignment, result);
-        assertDeepEquals(assignment, result);
+
+        assertThat(assignment.getId()).isEqualTo(1L);
+
+        assertThat(assignment)
+                .isEqualTo(manager.findAssignmentById(assignment.getId()))
+                .isNotSameAs(manager.findAssignmentById(assignment.getId()))
+                .isEqualToComparingFieldByField(manager.findAssignmentById(assignment.getId()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createAssignmentWithNullStart() {
-        Agent mufasa = newAgent("Mufasa", (short)3, (short)9, "999 999 999", true);
-        Mission defeatScar = newMission(
-                "Scar is plotting against the one and only great Mufasa and Mufasa has to stop him at all cost",
-                (short)1, 9, "Lion King", true);
-
-        Assignment assignment = newAssignment(null, LocalDateTime.now(), mufasa, defeatScar);
-
+        expectedException.expect(IllegalArgumentException.class);
+        Assignment assignment = shrekPrankAssignment().start(null).build();
         manager.createAssignment(assignment);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createAssignmentWithNullEnd() {
-        Agent mufasa = newAgent("Mufasa", (short)3, (short)9, "999 999 999", true);
-        Mission defeatScar = newMission(
-                "Scar is plotting against the one and only great Mufasa and Mufasa has to stop him at all cost",
-                (short)1, 9, "Lion King", true);
-
-        Assignment assignment = newAssignment(LocalDateTime.now(), null, mufasa, defeatScar);
-
+        expectedException.expect(IllegalArgumentException.class);
+        Assignment assignment = shrekPrankAssignment().end(null).build();
         manager.createAssignment(assignment);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createAssignmentWithNullAgent() {
-        Mission defeatScar = newMission(
-                "Scar is plotting against the one and only great Mufasa and Mufasa has to stop him at all cost",
-                (short)1, 9, "Lion King", true);
-
-        Assignment assignment = newAssignment(LocalDateTime.now(), LocalDateTime.of(LocalDate.of(2017, Month.APRIL, 4),
-                LocalTime.of(19, 0)), null, defeatScar);
-
+        expectedException.expect(IllegalArgumentException.class);
+        Assignment assignment = shrekPrankAssignment().agent(null).build();
         manager.createAssignment(assignment);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createAssignmentWithNullMission() {
-        Agent mufasa = newAgent("Mufasa", (short)3, (short)9, "999 999 999", true);
-
-        Assignment assignment = newAssignment(LocalDateTime.now(), LocalDateTime.of(LocalDate.of(2017, Month.APRIL, 4),
-                LocalTime.of(19, 0)), mufasa, null);
-
+        expectedException.expect(IllegalArgumentException.class);
+        Assignment assignment = shrekPrankAssignment().mission(null).build();
         manager.createAssignment(assignment);
     }
 
     @Test
     public void findAllAssignments() throws Exception {
-        assertTrue(manager.findAllAssignments().isEmpty());
-        Agent mufasa = newAgent("Mufasa", (short)3, (short)9, "999 999 999", true);
-        Mission defeatScar = newMission(
-                "Scar is plotting against the one and only great Mufasa and Mufasa has to stop him at all cost",
-                (short)1, 9, "Lion King", true);
+        assertThat(manager.findAllAssignments()).isEmpty();
 
-        Assignment assignment = newAssignment(LocalDateTime.now(),
-                LocalDateTime.of(LocalDate.of(2017, Month.APRIL, 4), LocalTime.of(19, 0)), mufasa, defeatScar);
-        manager.createAssignment(assignment);
+        Assignment assignmentA = keemstarNoChinAssignment().build();
+        manager.createAssignment(assignmentA);
 
-        assertFalse(manager.findAllAssignments().isEmpty());
+        assertThat(manager.findAllAssignments()).isNotEmpty();
 
-        Agent simba = newAgent("Simba", (short)3, (short)4, "777 777 777", true);
-        Mission theReturnOfScar = newMission(
-                "Simba is here to avenge his dead father",
-                (short)1, 10, "Lion King", true);
+        Assignment assignmentB = shrekPrankAssignment().build();
+        manager.createAssignment(assignmentB);
 
-        Assignment avengeMufasa = newAssignment(LocalDateTime.now(),
-                LocalDateTime.of(LocalDate.of(2017, Month.APRIL, 4), LocalTime.of(19, 0)), simba, theReturnOfScar);
-
-        manager.createAssignment(avengeMufasa);
-
-        int expectedSize = 2;
-
-        assertEquals(manager.findAllAssignments().size(), expectedSize);
-
-        List<Assignment> assignments = new ArrayList<>();
-        assignments.add(assignment);
-        assignments.add(avengeMufasa);
-
-        assertDeepEquals(assignments, manager.findAllAssignments());
+        assertThat(manager.findAllAssignments().size()).isEqualTo(2);
+        assertThat(manager.findAllAssignments())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(assignmentA, assignmentB);
     }
 
     @Test
     public void updateAssignment() throws Exception {
-        Agent mufasa = newAgent("Mufasa", (short)3, (short)9, "999 999 999", true);
-        Mission defeatScar = newMission(
-                "Scar is plotting against the one and only great Mufasa and Mufasa has to stop him at all cost",
-                (short)1, 9, "Lion King", true);
+        Assignment assignmentToBeUpdated = shrekPrankAssignment().build();
+        Assignment assignmentToBeUnchanged = keemstarNoChinAssignment().build();
 
-        Assignment assignment = newAssignment(LocalDateTime.now(),
-                LocalDateTime.of(LocalDate.of(2017, Month.APRIL, 4), LocalTime.of(19, 0)), mufasa, defeatScar);
+        manager.createAssignment(assignmentToBeUpdated);
+        manager.createAssignment(assignmentToBeUnchanged);
 
-        manager.createAssignment(assignment);
+        assignmentToBeUpdated.setAgent(agentKeemstar().build());
+        manager.updateAssignment(assignmentToBeUpdated);
 
-        Agent simba = newAgent("Simba", (short)3, (short)4, "777 777 777", true);
+        assertThat(assignmentToBeUpdated)
+                .isEqualToComparingFieldByField(manager.findAssignmentById(assignmentToBeUpdated.getId()));
 
-        Assignment update1 = newAssignment(assignment);
-        update1.setAgent(simba);
-        manager.updateAssignment(update1);
-        assertDeepEquals(update1, manager.findAssignmentById(update1.getId()));
+        assignmentToBeUpdated.setMission(noChinMission().build());
+        manager.updateAssignment(assignmentToBeUpdated);
+        assertThat(assignmentToBeUpdated)
+                .isEqualToComparingFieldByField(manager.findAssignmentById(assignmentToBeUpdated.getId()));
 
-        Mission theReturnOfScar = newMission(
-                "Simba is here to avenge his dead father",
-                (short)1, 10, "Lion King", true);
+        assignmentToBeUpdated.setEnd(START);
+        manager.updateAssignment(assignmentToBeUpdated);
+        assertThat(assignmentToBeUpdated)
+                .isEqualToComparingFieldByField(manager.findAssignmentById(assignmentToBeUpdated.getId()));
 
-        Assignment update2 = newAssignment(update1);
-        update2.setMission(theReturnOfScar);
-        manager.updateAssignment(update2);
-        assertDeepEquals(update2, manager.findAssignmentById(update2.getId()));
-
-        Assignment update3 = newAssignment(update2);
-        update3.setEnd(LocalDateTime.now());
-        manager.updateAssignment(update3);
-        assertDeepEquals(update3, manager.findAssignmentById(update3.getId()));
+        assertThat(assignmentToBeUnchanged)
+                .isEqualToComparingFieldByField(keemstarNoChinAssignment().build())
+                .isEqualToComparingFieldByField(manager.findAssignmentById(assignmentToBeUnchanged.getId()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void updateNullAssignment() {
+        expectedException.expect(IllegalArgumentException.class);
         manager.updateAssignment(null);
     }
 
     @Test
     public void deleteAssignment() throws Exception {
-        assertTrue(manager.findAllAssignments().isEmpty());
-        Agent mufasa = newAgent("Mufasa", (short)3, (short)9, "999 999 999", true);
-        Mission defeatScar = newMission(
-                "Scar is plotting against the one and only great Mufasa and Mufasa has to stop him at all cost",
-                (short)1, 9, "Lion King", true);
+        Assignment assignmentToBeDeleted = keemstarNoChinAssignment().build();
+        Assignment assignmentToBeUnchanged = shrekPrankAssignment().build();
 
-        Assignment assignment = newAssignment(LocalDateTime.now(),
-                LocalDateTime.of(LocalDate.of(2017, Month.APRIL, 4), LocalTime.of(19, 0)), mufasa, defeatScar);
+        manager.createAssignment(assignmentToBeDeleted);
+        manager.createAssignment(assignmentToBeUnchanged);
 
-        manager.createAssignment(assignment);
-        assertFalse(manager.findAllAssignments().isEmpty());
-        assertDeepEquals(assignment, manager.findAssignmentById(assignment.getId()));
-        manager.deleteAssignment(assignment);
-        assertTrue(manager.findAllAssignments().isEmpty());
-    }
+        assertThat(manager.findAllAssignments().size()).isEqualTo(2);
 
-    private static Agent newAgent(String name, short gender, short age, String phoneNumber, boolean alive) {
-        Agent agent = new Agent();
-        agent.setName(name);
-        agent.setGender(gender);
-        agent.setAge(age);
-        agent.setPhoneNumber(phoneNumber);
-        agent.setAlive(alive);
-        return agent;
-    }
+        manager.deleteAssignment(assignmentToBeDeleted);
 
-    private static Agent newAgent(Agent originalAgent) {
-        return newAgent(originalAgent.getName(),originalAgent.getGender(),originalAgent.getAge(),
-                originalAgent.getPhoneNumber(),originalAgent.isAlive());
-    }
-
-    private static Mission newMission(Mission originalMission) {
-        return newMission(originalMission.getDescription(),
-                originalMission.getNumberOfRequiredAgents(),originalMission.getDifficulty(),originalMission.getPlace(),
-                originalMission.isSuccessful());
-    }
-
-    private static Mission newMission(String description, short requiredAgents,
-                                      int difficulty,String place,boolean successful) {
-        Mission mission = new Mission();
-        mission.setDescription(description);
-        mission.setNumberOfRequiredAgents(requiredAgents);
-        mission.setDifficulty(difficulty);
-        mission.setPlace(place);
-        mission.setSuccessful(successful);
-        return mission;
-    }
-
-    private static Assignment newAssignment(LocalDateTime start, LocalDateTime end, Agent agent, Mission mission) {
-        Assignment assignment = new Assignment();
-        assignment.setStart(start);
-        assignment.setEnd(end);
-        assignment.setAgent(newAgent(agent));
-        assignment.setMission(newMission(mission));
-        return assignment;
-    }
-
-    private static Assignment newAssignment(Assignment originalAssignment) {
-        return newAssignment(originalAssignment.getStart(), originalAssignment.getEnd(),
-                originalAssignment.getAgent(), originalAssignment.getMission());
-    }
-
-    private void assertDeepEquals(Assignment originalAssignment, Assignment expectedAssignment) {
-        assertNotNull(expectedAssignment);
-        assertEquals(originalAssignment.getId(),expectedAssignment.getId());
-        assertEquals(originalAssignment.getStart(),expectedAssignment.getStart());
-        assertEquals(originalAssignment.getEnd(),expectedAssignment.getEnd());
-        assertEquals(originalAssignment.getAgent(),expectedAssignment.getAgent());
-        assertEquals(originalAssignment.getMission(),expectedAssignment.getMission());
-    }
-
-    private void assertDeepEquals(List<Assignment> expectedList, List<Assignment> originalList) {
-        assertEquals(expectedList.size(),originalList.size());
-        for (int i = 0 ; i < originalList.size() ; ++i) {
-            assertDeepEquals(expectedList.get(i),originalList.get(i));
-        }
+        assertThat(manager.findAllAssignments())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(assignmentToBeUnchanged);
+        assertThat(manager.findAllAssignments().size()).isEqualTo(1);
     }
 }

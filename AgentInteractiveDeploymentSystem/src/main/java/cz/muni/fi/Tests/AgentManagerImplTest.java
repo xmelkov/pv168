@@ -3,12 +3,16 @@ package cz.muni.fi.Tests;
 import cz.muni.fi.Base.Agent;
 import cz.muni.fi.ManagersImpl.AgentManagerImpl;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
+
 
 /**
  * Created by Samuel on 14.03.2017.
@@ -22,140 +26,138 @@ public class AgentManagerImplTest {
         manager = new AgentManagerImpl();
     }
 
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    private AgentBuilder agentKeemstar() {
+        return new AgentBuilder()
+                .id(null)
+                .name("Keemstar")
+                .gender((short) 6)
+                .age((short) 36)
+                .phoneNumber("+421 999 888 777")
+                .alive(true);
+    }
+
+    private AgentBuilder agentShrek() {
+        return new AgentBuilder()
+                .id(null)
+                .name("Shrek")
+                .gender((short) 4)
+                .age((short) 19)
+                .phoneNumber("0123456788")
+                .alive(true);
+    }
+
     @Test
     public void createAgent() throws Exception {
-        assertTrue(manager.findAllAgents().isEmpty());
-        Agent agent = newAgent("Franku", (short) 6,(short) 22,"+421 988 666 690",true);
+        assertThat(manager.findAllAgents()).isEmpty();
+        Agent agent = agentKeemstar().build();
         manager.createAgent(agent);
 
-        long agentId = agent.getId();
-        assertFalse(agentId == 0);
 
-        Agent foundAgent = manager.findAgentById(agentId);
+        assertThat(agent.getId()).isEqualTo(1);
 
-        assertEquals(agent,foundAgent);
-        assertNotSame(agent,foundAgent);
-        assertDeepEquals(agent,foundAgent);
+        Agent foundAgent = manager.findAgentById(1);
+
+        assertThat(agent).isEqualTo(foundAgent)
+                .isNotSameAs(foundAgent)
+                .isEqualToComparingFieldByField(foundAgent);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createAgentWithEmptyName() {
-        Agent agent = newAgent("", (short) 6,(short) 25,"+421 000 000 000",true);
+        Agent agent = agentKeemstar().name("").build();
+        expectedException.expect(IllegalArgumentException.class);
         manager.createAgent(agent);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createAgentWithoutPhoneNumber() {
-        Agent agent = newAgent("Keemstar", (short) 6,(short) 36,"",true);
+        Agent agent = agentShrek().name("").build();
+        expectedException.expect(IllegalArgumentException.class);
         manager.createAgent(agent);
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createAgentUnderAge() {
-        Agent agent = newAgent("Jacob Sartorius", (short) 6,(short) 10,
-                "+421 123 456 789",true);
+        Agent agent = agentShrek().age((short) 3).build();
+        expectedException.expect(IllegalArgumentException.class);
         manager.createAgent(agent);
     }
 
 
     @Test(expected = IllegalArgumentException.class)
     public void createNullAgent() {
+        expectedException.expect(IllegalArgumentException.class);
         manager.createAgent(null);
     }
 
 
     @Test
     public void findAllAgents() throws Exception {
-        assertTrue(manager.findAllAgents().isEmpty());
-        Agent felix = newAgent( "Felix Kjellberg", (short) 3,(short) 25,
-                "0123456789",true);
-        manager.createAgent(felix);
-        assertFalse(manager.findAllAgents().isEmpty());
+        assertThat(manager.findAllAgents()).isEmpty();
 
-        Agent shrek = newAgent("Shrek", (short) 4,(short) 19, "0123456788",true);
-        manager.createAgent(shrek);
+        Agent agentA = agentKeemstar().build();
+        manager.createAgent(agentA);
 
-        int expectedSize = 2;
-        assertEquals(expectedSize,manager.findAllAgents().size());
+        assertThat(manager.findAllAgents()).isNotEmpty();
 
-        List<Agent> agentz = new ArrayList<>();
-        agentz.add(felix);
-        agentz.add(shrek);
+        Agent agentB = agentShrek().build();
+        manager.createAgent(agentB);
 
-        assertDeepEquals(agentz,manager.findAllAgents());
+        assertThat(manager.findAllAgents().size()).isEqualTo(2);
+
+        assertThat(manager.findAllAgents()).usingFieldByFieldElementComparator().containsOnly(agentA, agentB);
     }
 
     @Test
     public void updateAgent() throws Exception {
-        Agent agent = newAgent("Senpai", (short) 6,(short) 25,"+421 147 852 369",true);
+        Agent agent = agentShrek().build();
+        Agent unchangedAgent = agentKeemstar().build();
         manager.createAgent(agent);
+        manager.createAgent(unchangedAgent);
 
-        Agent update1 = newAgent(agent);
-        update1.setName("Yandere");
-        manager.updateAgent(update1);
-        assertDeepEquals(update1,manager.findAgentById(update1.getId()));
+        agent.setName("nameUpdated");
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
 
-        Agent update2 = newAgent(update1);
-        update2.setAge((short) 18);
-        manager.updateAgent(update2);
-        assertDeepEquals(update2,manager.findAgentById(update2.getId()));
+        agent.setAlive(!agent.isAlive());
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
 
-        Agent update3 = newAgent(update2);
-        update3.setGender((short) 1);
-        manager.updateAgent(update3);
-        assertDeepEquals(update3,manager.findAgentById(update3.getId()));
+        agent.setAge((short) 3);
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
 
+        assertThat(unchangedAgent).isEqualToComparingFieldByField(manager.findAgentById(unchangedAgent.getId()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void updateNullAgent() {
+        expectedException.expect(IllegalArgumentException.class);
         manager.updateAgent(null);
     }
 
     @Test
     public void deleteAgent() throws Exception {
-        assertTrue(manager.findAllAgents().isEmpty());
-        Agent jackie = newAgent("Jackie Chen",(short)1,(short) 120,"159 789 456",true);
+        Agent agentToBeDeleted = agentKeemstar().build();
+        Agent agentUnchanged = agentShrek().build();
 
-        manager.createAgent(jackie);
-        assertFalse(manager.findAllAgents().isEmpty());
-        assertDeepEquals(jackie,manager.findAgentById(jackie.getId()));
-        manager.deleteAgent(jackie);
-        assertTrue(manager.findAllAgents().isEmpty());
-    }
+        manager.createAgent(agentToBeDeleted);
+        manager.createAgent(agentUnchanged);
 
-    private static Agent newAgent(String name, short gender, short age, String phoneNumber, boolean alive) {
-        Agent agent = new Agent();
-        agent.setName(name);
-        agent.setGender(gender);
-        agent.setAge(age);
-        agent.setPhoneNumber(phoneNumber);
-        agent.setAlive(alive);
-        return agent;
-    }
+        assertThat(manager.findAllAgents().size()).isEqualTo(2);
+        assertThat(manager.findAllAgents())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(agentToBeDeleted,agentUnchanged);
 
-    private static Agent newAgent(Agent originalAgent) {
-        return newAgent(originalAgent.getName(),originalAgent.getGender(),originalAgent.getAge(),
-                originalAgent.getPhoneNumber(),originalAgent.isAlive());
-    }
+        manager.deleteAgent(agentToBeDeleted);
 
-    private void assertDeepEquals(Agent originalAgent,Agent expectedAgent) {
-        assertNotNull(expectedAgent);
-        assertEquals(originalAgent.getId(),expectedAgent.getId());
-        assertEquals(originalAgent.getAge(),expectedAgent.getAge());
-        assertEquals(originalAgent.getGender(),expectedAgent.getGender());
-        assertEquals(originalAgent.getPhoneNumber(),expectedAgent.getPhoneNumber());
-        assertEquals(originalAgent.getName(),expectedAgent.getName());
-        assertEquals(originalAgent.isAlive(),expectedAgent.isAlive());
+        assertThat(manager.findAllAgents().size()).isEqualTo(1);
+        assertThat(manager.findAllAgents())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(agentUnchanged);
     }
-    private void assertDeepEquals(List<Agent> expected, List<Agent> actual) {
-        assertEquals(expected.size(),actual.size());
-        for (int i = 0 ; i < expected.size() ; ++i) {
-            Agent expectedAgent = expected.get(i);
-            Agent actualAgent = actual.get(i);
-            assertDeepEquals(expectedAgent,actualAgent);
-        }
-    }
-
 }

@@ -4,11 +4,14 @@ import com.sun.javaws.exceptions.InvalidArgumentException;
 import cz.muni.fi.Base.Mission;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Created by Samuel on 14.03.2017.
@@ -21,93 +24,96 @@ public class MissionManagerImplTest {
         manager = new MissionManagerImpl();
     }
 
-    @Test
-    public void createMission() throws Exception {
-        assertTrue(manager.findAllMissions().isEmpty());
-        Mission mission = newMission("Eliminate mysterious inteloper with no chin",
-                (short)1,100,"Seattle",true);
-        manager.createMission(mission);
-        assertFalse(manager.findAllMissions().isEmpty());
+    @Rule
+    ExpectedException expectedException = ExpectedException.none();
 
-        long id = mission.getId();
-        assertFalse(id == 0);
-
-        Mission created = manager.findMissionById(id);
-        assertNotNull(created);
-        assertNotSame(mission,created);
-        assertDeepEquals(mission,created);
+    private MissionBuilder noChinMission() {
+        return new MissionBuilder()
+                .id(null)
+                .description("Eliminate mysterious inteloper with no chin")
+                .numberOfRequiredAgents((short) 1)
+                .difficulty(100)
+                .place("Seattle")
+                .successful(true);
     }
 
-    @Test(expected = InvalidArgumentException.class)
+    private MissionBuilder prankMission() {
+        return new MissionBuilder()
+                .id(null)
+                .description("Prank some1 really good")
+                .numberOfRequiredAgents((short) 3)
+                .difficulty(44)
+                .place("Poland")
+                .successful(true);
+    }
+
+    @Test
+    public void createMission() throws Exception {
+        assertThat(manager.findAllMissions()).isEmpty();
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        assertThat(manager.findAllMissions()).isNotEmpty();
+
+        assertThat(mission.getId()).isEqualTo(1);
+
+        assertThat(manager.findMissionById(mission.getId()))
+                .isNotNull()
+                .isNotSameAs(noChinMission().build())
+                .isEqualToComparingFieldByField(noChinMission().id(1L).build());
+    }
+
+    @Test
     public void createMissionWithoutDescription() {
-        Mission mission = newMission("",(short)1,15,"Brno",true);
+        expectedException.expect(InvalidArgumentException.class);
+        Mission mission = prankMission().description("").build();
         manager.createMission(mission);
     }
 
     @Test
     public void updateMission() throws Exception {
-        Mission originalMission = newMission("Prank some1 really good", (short) 3, 44,
-                "Auschwitz",true);
-        manager.createMission(originalMission);
-        assertFalse(manager.findAllMissions().isEmpty());
-        assertDeepEquals(originalMission,manager.findMissionById(originalMission.getId()));
+        Mission missionToBeUpdated = noChinMission().build();
+        Mission missionToBeUnchanged = noChinMission().build();
 
-        Mission update1 = newMission(originalMission);
-        update1.setDescription("Hey thats pretty good!");
-        manager.updateMission(update1);
-        assertDeepEquals(update1,manager.findMissionById(update1.getId()));
+        manager.createMission(missionToBeUpdated);
+        manager.createMission(missionToBeUnchanged);
 
-        Mission update2 = newMission(update1);
-        update2.setDescription("Bake some tasty hair cake");
-        update2.setPlace("Afghanistan");
-        assertDeepEquals(update1,manager.findMissionById(update1.getId()));
-        manager.updateMission(update2);
-        assertDeepEquals(update2,manager.findMissionById(update2.getId()));
+        assertThat(manager.findAllMissions().size()).isEqualTo(2);
 
+        missionToBeUpdated.setDescription("Hey thats pretty good!");
+        manager.updateMission(missionToBeUpdated);
+
+        assertThat(missionToBeUpdated)
+                .isEqualToComparingFieldByField(manager.findMissionById(missionToBeUpdated.getId()));
+
+        missionToBeUpdated.setPlace("Afghanistan");
+        manager.updateMission(missionToBeUpdated);
+
+        assertThat(missionToBeUpdated)
+                .isEqualToComparingFieldByField(manager.findMissionById(missionToBeUpdated.getId()));
+        assertThat(missionToBeUnchanged)
+                .isEqualToComparingFieldByField(manager.findMissionById(missionToBeUnchanged.getId()))
+                .isEqualToComparingFieldByField(noChinMission().id(missionToBeUnchanged.getId()).build());
     }
 
     @Test
     public void deleteMission() throws Exception {
-        assertTrue(manager.findAllMissions().isEmpty());
-        Mission mission = newMission("Assasinate killer Keemstar",
-                (short)3,88,"Buffalo",true);
-        manager.createMission(mission);
-        assertFalse(manager.findAllMissions().isEmpty());
-        assertNotNull(manager.findMissionById(mission.getId()));
-        manager.deleteMission(mission);
-        assertTrue(manager.findAllMissions().isEmpty());
-    }
+        Mission missionToBeDeleted = prankMission().build();
+        Mission missionToBeUnchanged = noChinMission().build();
 
-    private static Mission newMission(String description, short requiredAgents,
-                              int difficulty,String place,boolean successful) {
-        Mission mission = new Mission();
-        mission.setDescription(description);
-        mission.setNumberOfRequiredAgents(requiredAgents);
-        mission.setDifficulty(difficulty);
-        mission.setPlace(place);
-        mission.setSuccessful(successful);
-        return mission;
-    }
+        manager.createMission(missionToBeDeleted);
+        manager.createMission(missionToBeUnchanged);
 
-    private static Mission newMission(Mission originalMission) {
-        return newMission(originalMission.getDescription(),originalMission.getNumberOfRequiredAgents(),
-                originalMission.getDifficulty(),originalMission.getPlace(),originalMission.isSuccessful());
-    }
+        assertThat(manager.findAllMissions())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(missionToBeDeleted, missionToBeUnchanged);
+        assertThat(manager.findAllMissions().size()).isEqualTo(2);
 
-    private void assertDeepEquals(Mission originalMission, Mission expectedMission) {
-        assertNotNull(expectedMission);
-        assertEquals(originalMission.getId(),expectedMission.getId());
-        assertEquals(originalMission.getDescription(),expectedMission.getDescription());
-        assertEquals(originalMission.getNumberOfRequiredAgents(),expectedMission.getNumberOfRequiredAgents());
-        assertEquals(originalMission.getDifficulty(),expectedMission.getDifficulty());
-        assertEquals(originalMission.getPlace(),expectedMission.getPlace());
-        assertEquals(originalMission.isSuccessful(),expectedMission.isSuccessful());
-    }
+        manager.deleteMission(missionToBeDeleted);
 
-    private void assertDeepEquals(List<Mission> expectedList, List<Mission> originalList) {
-        assertEquals(expectedList.size(),originalList.size());
-        for (int i = 0 ; i < originalList.size() ; ++i) {
-            assertDeepEquals(expectedList.get(i),originalList.get(i));
-        }
+        assertThat(manager.findAllMissions())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(missionToBeUnchanged);
+        assertThat(manager.findAllMissions().size()).isEqualTo(1);
     }
 }
