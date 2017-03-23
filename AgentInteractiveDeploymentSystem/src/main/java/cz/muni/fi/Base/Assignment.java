@@ -53,6 +53,17 @@ public class Assignment {
     }
 
     @Override
+    public String toString() {
+        return "Assignment{" +
+                "id=" + id +
+                ", start=" + start +
+                ", end=" + end +
+                ", agent=" + agent +
+                ", mission=" + mission +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

@@ -60,6 +60,18 @@ public class Mission {
     }
 
     @Override
+    public String toString() {
+        return "Mission{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", numberOfRequiredAgents=" + numberOfRequiredAgents +
+                ", difficulty=" + difficulty +
+                ", place='" + place + '\'' +
+                ", successful=" + successful +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

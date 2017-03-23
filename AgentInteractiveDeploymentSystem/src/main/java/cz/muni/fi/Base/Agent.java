@@ -60,6 +60,18 @@ public class Agent {
     }
 
     @Override
+    public String toString() {
+        return "Agent{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", gender=" + gender +
+                ", age=" + age +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", alive=" + alive +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
