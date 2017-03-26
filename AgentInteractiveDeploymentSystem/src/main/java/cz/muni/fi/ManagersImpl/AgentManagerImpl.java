@@ -35,11 +35,6 @@ public class AgentManagerImpl implements AgentManager{
         }
     };
 
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
     @Override
     public void createAgent(Agent agent) {
         SimpleJdbcInsert insertCustomer = new SimpleJdbcInsert(jdbcTemplate).withTableName("agents").
@@ -75,5 +70,10 @@ public class AgentManagerImpl implements AgentManager{
     @Override
     public void deleteAgent(Agent agent) {
         jdbcTemplate.update("DELETE FROM agents where id=?",agent.getId());
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 }
