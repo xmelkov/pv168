@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Created by Samuel on 08.03.2017.
+ * Created by xmelkov on 08.03.2017.
  */
 public class AgentManagerImpl implements AgentManager{
 
