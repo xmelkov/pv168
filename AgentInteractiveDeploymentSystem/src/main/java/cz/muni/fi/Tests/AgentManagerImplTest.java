@@ -2,16 +2,17 @@ package cz.muni.fi.Tests;
 
 import cz.muni.fi.Base.Agent;
 import cz.muni.fi.ManagersImpl.AgentManagerImpl;
+import cz.muni.fi.common.ValidationException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 
 
 /**
@@ -19,11 +20,19 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class AgentManagerImplTest {
 
+    private EmbeddedDatabase db;
     private AgentManagerImpl manager;
 
     @Before
     public void setUp() throws Exception {
+        db = new EmbeddedDatabaseBuilder().setType(DERBY).addScript("my-schema.sql").build();
         manager = new AgentManagerImpl();
+        manager.setDataSource(db);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        db.shutdown();
     }
 
     @Rule
@@ -58,7 +67,7 @@ public class AgentManagerImplTest {
 
         assertThat(agent.getId()).isEqualTo(1);
 
-        Agent foundAgent = manager.findAgentById(1);
+        Agent foundAgent = manager.findAgentById(1L);
 
         assertThat(agent).isEqualTo(foundAgent)
                 .isNotSameAs(foundAgent)
@@ -68,14 +77,14 @@ public class AgentManagerImplTest {
     @Test
     public void createAgentWithEmptyName() {
         Agent agent = agentKeemstar().name("").build();
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(ValidationException.class);
         manager.createAgent(agent);
     }
 
     @Test
     public void createAgentWithoutPhoneNumber() {
-        Agent agent = agentShrek().name("").build();
-        expectedException.expect(IllegalArgumentException.class);
+        Agent agent = agentShrek().phoneNumber("").build();
+        expectedException.expect(ValidationException.class);
         manager.createAgent(agent);
     }
 
@@ -83,12 +92,12 @@ public class AgentManagerImplTest {
     @Test
     public void createAgentUnderAge() {
         Agent agent = agentShrek().age((short) 3).build();
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(ValidationException.class);
         manager.createAgent(agent);
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createNullAgent() {
         expectedException.expect(IllegalArgumentException.class);
         manager.createAgent(null);
@@ -127,7 +136,7 @@ public class AgentManagerImplTest {
         manager.updateAgent(agent);
         assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
 
-        agent.setAge((short) 3);
+        agent.setAge((short) 20);
         manager.updateAgent(agent);
         assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
 
