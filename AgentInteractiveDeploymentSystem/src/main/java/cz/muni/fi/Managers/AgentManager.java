@@ -9,7 +9,7 @@ import java.util.List;
 public interface AgentManager {
     void createAgent(Agent agent);
 
-    Agent findAgentById(long agentId);
+    Agent findAgentById(Long agentId);
 
     List<Agent> findAllAgents();
 
