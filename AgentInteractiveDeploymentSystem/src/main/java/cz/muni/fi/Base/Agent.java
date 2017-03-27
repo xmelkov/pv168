@@ -4,7 +4,7 @@ package cz.muni.fi.Base;
  * Created by xmelkov on 8.3.17.
  */
 public class Agent {
-    private long id;
+    private Long id;
     private String name;
     private short gender;
     private short age;
@@ -15,7 +15,7 @@ public class Agent {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -82,7 +82,7 @@ public class Agent {
 
         Agent agent = (Agent) o;
 
-        return id == agent.id;
+        return id.equals(agent.id);
     }
 
     @Override
