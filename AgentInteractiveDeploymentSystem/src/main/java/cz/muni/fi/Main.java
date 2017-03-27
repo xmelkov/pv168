@@ -6,8 +6,8 @@ import cz.muni.fi.Managers.MissionManager;
 import cz.muni.fi.ManagersImpl.AgentManagerImpl;
 import cz.muni.fi.ManagersImpl.AssignmentManagerImpl;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
-import org.apache.commons.dbcp2.BasicDataSource;
-//import org.apache.derby.jdbc.EmbeddedDataSource;
+
+import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.util.Properties;
 
 /**
  * Created by xmelkov on 8.3.17.
@@ -48,12 +47,13 @@ public class Main {
 
         @Bean
         public DataSource dataSource() {
-            BasicDataSource bds = new BasicDataSource(); //Apache DBCP connection pooling DataSource
-            bds.setDriverClassName(env.getProperty("jdbc.driver"));
-            bds.setUrl(env.getProperty("jdbc.url"));
-            bds.setUsername(env.getProperty("jdbc.user"));
-            bds.setPassword(env.getProperty("jdbc.password"));
-            return bds;
+            EmbeddedDataSource ds = new EmbeddedDataSource();
+
+            ds.setDriverClassName(env.getProperty("jdbc.driver"));
+            ds.setUrl(env.getProperty("jdbc.url"));
+            ds.setUsername(env.getProperty("jdbc.user"));
+            ds.setPassword(env.getProperty("jdbc.password"));
+            return ds;
         }
 
         @Bean
