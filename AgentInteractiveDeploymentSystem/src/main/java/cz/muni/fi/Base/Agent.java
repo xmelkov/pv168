@@ -11,7 +11,7 @@ public class Agent {
     private String phoneNumber;
     private boolean alive;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

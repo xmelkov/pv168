@@ -9,6 +9,7 @@ import cz.muni.fi.Managers.MissionManager;
 import cz.muni.fi.common.DBUtils;
 import cz.muni.fi.common.IllegalEntityException;
 import cz.muni.fi.common.ValidationException;
+import org.springframework.cglib.core.Local;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -19,10 +20,12 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -41,8 +44,8 @@ public class AssignmentManagerImpl implements AssignmentManager {
         public Assignment mapRow(ResultSet resultSet, int i) throws SQLException {
             Assignment assignment = new Assignment();
             assignment.setId(resultSet.getLong("id"));
-            assignment.setStart(resultSet.getTimestamp("start").toLocalDateTime());
-            assignment.setEnd(resultSet.getTimestamp("end").toLocalDateTime());
+            assignment.setStart(LocalDateTime.parse(resultSet.getString("startDate")));
+            assignment.setEnd(LocalDateTime.parse(resultSet.getString("endDate")));
             try {
                 assignment.setAgent(agentManager.findAgentById(resultSet.getLong("agentId")));
             } catch (EmptyResultDataAccessException e) {
@@ -61,13 +64,19 @@ public class AssignmentManagerImpl implements AssignmentManager {
     @Override
     public void createAssignment(Assignment assignment) {
         DBUtils.validate(assignment);
+        if (agentManager.findAgentById(assignment.getAgent().getId()) == null) {
+            throw new ValidationException("agent from assignment not in DB");
+        }
+        if (missionManager.findMissionById(assignment.getMission().getId()) == null) {
+            throw new ValidationException("mission from assignment no in DB");
+        }
         SimpleJdbcInsert insertAssignment = new SimpleJdbcInsert(jdbcTemplate).withTableName("assignments").
                 usingGeneratedKeyColumns("id");
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("agentId", assignment.getAgent().getId())
-                .addValue("missionId", assignment.getMission().getId())
-                .addValue("start", toSQLTimestamp(assignment.getStart()))
-                .addValue("end", toSQLTimestamp(assignment.getEnd()));
+                .addValue("AgentId", assignment.getAgent().getId())
+                .addValue("MissionId", assignment.getMission().getId())
+                .addValue("startDate", assignment.getStart().toString())
+                .addValue("endDate", assignment.getEnd().toString());
         Number id = insertAssignment.executeAndReturnKey(parameters);
         assignment.setId(id.longValue());
 
@@ -91,15 +100,18 @@ public class AssignmentManagerImpl implements AssignmentManager {
     @Override
     public void updateAssignment(Assignment assignment) {
         DBUtils.validate(assignment);
-        jdbcTemplate.update("UPDATE assignments SET start=?, end=?, agentId=?, missionId=? WHERE id=?",
-                assignmentMapper, toSQLTimestamp(assignment.getStart()), toSQLTimestamp(assignment.getEnd()),
-                assignment.getAgent().getId(), assignment.getMission().getId(),assignment.getId());
+        jdbcTemplate.update("UPDATE assignments SET startDate=?, endDate=?, AgentId=?, MissionId=? WHERE id=?",
+                assignment.getStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                assignment.getEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                assignment.getAgent().getId(),
+                assignment.getMission().getId(),
+                assignment.getId());
     }
 
     @Override
     public void deleteAssignment(Assignment assignment) {
         DBUtils.validate(assignment);
-        jdbcTemplate.update("DELETE FROM assignments WHERE id=?", assignmentMapper, assignment.getId());
+        jdbcTemplate.update("DELETE FROM assignments WHERE id=?", assignment.getId());
     }
 
     @Override
@@ -131,10 +143,6 @@ public class AssignmentManagerImpl implements AssignmentManager {
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
 
-    private Timestamp toSQLTimestamp(LocalDateTime localDateTime) {
-        if (localDateTime == null) return null;
-        return new Timestamp(ZonedDateTime.of(localDateTime, ZoneId.systemDefault()).toInstant().toEpochMilli());
     }
 }

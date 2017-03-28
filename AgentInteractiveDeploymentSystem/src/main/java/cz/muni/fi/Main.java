@@ -51,21 +51,21 @@ public class Main {
         }
 
         @Bean
-        public AgentManager agentManager() {
+        public AgentManagerImpl agentManager() {
             AgentManagerImpl agentManager = new AgentManagerImpl();
             agentManager.setDataSource(dataSource());
             return agentManager;
         }
 
         @Bean
-        public MissionManager missionManager() {
+        public MissionManagerImpl missionManager() {
             MissionManagerImpl missionManager = new MissionManagerImpl();
             missionManager.setDataSource(dataSource());
             return missionManager;
         }
 
         @Bean
-        public AssignmentManager assignmentManager() {
+        public AssignmentManagerImpl assignmentManager() {
             AssignmentManagerImpl assignmentManager = new AssignmentManagerImpl();
             assignmentManager.setDataSource(dataSource());
             assignmentManager.setAgentManager(agentManager());

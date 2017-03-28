@@ -4,18 +4,18 @@ package cz.muni.fi.Base;
  * Created by xmelkov on 8.3.17.
  */
 public class Mission {
-    private long id;
+    private Long id;
     private String description;
     private short numberOfRequiredAgents = 1;
     private int difficulty;
     private String place;
     private boolean successful;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -20,5 +20,5 @@ CREATE TABLE assignments (
   id           BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   AgentId      BIGINT REFERENCES agents (id) ON DELETE CASCADE,
   MissionId    BIGINT REFERENCES missions (id) ON DELETE CASCADE,
-  start        TIMESTAMP,
-  "end"        TIMESTAMP);
+  startDate    VARCHAR(100),
+  endDate      VARCHAR(100));

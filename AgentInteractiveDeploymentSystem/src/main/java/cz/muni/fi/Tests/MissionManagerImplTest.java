@@ -3,29 +3,42 @@ package cz.muni.fi.Tests;
 import com.sun.javaws.exceptions.InvalidArgumentException;
 import cz.muni.fi.Base.Mission;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
+import cz.muni.fi.common.ValidationException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 
 /**
  * Created by Samuel on 14.03.2017.
  */
 public class MissionManagerImplTest {
+    private EmbeddedDatabase db;
     private MissionManagerImpl manager;
 
     @Before
     public void setUp() throws Exception {
+        db = new EmbeddedDatabaseBuilder().setType(DERBY).addScript("my-schema.sql").build();
         manager = new MissionManagerImpl();
+        manager.setDataSource(db);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        db.shutdown();
     }
 
     @Rule
-    ExpectedException expectedException = ExpectedException.none();
+    public ExpectedException expectedException = ExpectedException.none();
 
     private MissionBuilder noChinMission() {
         return new MissionBuilder()
@@ -65,7 +78,7 @@ public class MissionManagerImplTest {
 
     @Test
     public void createMissionWithoutDescription() {
-        expectedException.expect(InvalidArgumentException.class);
+        expectedException.expect(ValidationException.class);
         Mission mission = prankMission().description("").build();
         manager.createMission(mission);
     }

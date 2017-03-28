@@ -3,27 +3,50 @@ package cz.muni.fi.Tests;
 import cz.muni.fi.Base.Agent;
 import cz.muni.fi.Base.Assignment;
 import cz.muni.fi.Base.Mission;
+import cz.muni.fi.ManagersImpl.AgentManagerImpl;
 import cz.muni.fi.ManagersImpl.AssignmentManagerImpl;
+import cz.muni.fi.ManagersImpl.MissionManagerImpl;
+import cz.muni.fi.common.ValidationException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 import java.time.*;
 import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 
 /**
  * Created by Samuel on 14.03.2017.
  */
 public class AssignmentManagerImplTest {
+    private EmbeddedDatabase db;
     private AssignmentManagerImpl manager;
+    private AgentManagerImpl agentManager;
+    private MissionManagerImpl missionManager;
 
     @Before
     public void setUp() throws Exception {
+        db = new EmbeddedDatabaseBuilder().setType(DERBY).addScript("my-schema.sql").build();
+        agentManager = new AgentManagerImpl();
+        agentManager.setDataSource(db);
+        missionManager = new MissionManagerImpl();
+        missionManager.setDataSource(db);
         manager = new AssignmentManagerImpl();
+        manager.setAgentManager(agentManager);
+        manager.setMissionManager(missionManager);
+        manager.setDataSource(db);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        db.shutdown();
     }
 
     @Rule
@@ -37,7 +60,6 @@ public class AssignmentManagerImplTest {
 
     private MissionBuilder noChinMission() {
         return new MissionBuilder()
-                .id(1L)
                 .description("Eliminate mysterious inteloper with no chin")
                 .numberOfRequiredAgents((short) 1)
                 .difficulty(100)
@@ -47,7 +69,6 @@ public class AssignmentManagerImplTest {
 
     private MissionBuilder prankMission() {
         return new MissionBuilder()
-                .id(2L)
                 .description("Prank some1 really good")
                 .numberOfRequiredAgents((short) 3)
                 .difficulty(44)
@@ -57,7 +78,6 @@ public class AssignmentManagerImplTest {
 
     private AgentBuilder agentKeemstar() {
         return new AgentBuilder()
-                .id(1L)
                 .name("Keemstar")
                 .gender((short) 6)
                 .age((short) 36)
@@ -67,7 +87,6 @@ public class AssignmentManagerImplTest {
 
     private AgentBuilder agentShrek() {
         return new AgentBuilder()
-                .id(2L)
                 .name("Shrek")
                 .gender((short) 4)
                 .age((short) 19)
@@ -76,21 +95,29 @@ public class AssignmentManagerImplTest {
     }
 
     private AssignmentBuilder shrekPrankAssignment() {
+        Agent shrek = agentShrek().build();
+        Mission prank = prankMission().build();
+        agentManager.createAgent(shrek);
+        missionManager.createMission(prank);
         return new AssignmentBuilder()
                 .id(null)
                 .start(START)
                 .end(END)
-                .agent(agentShrek().build())
-                .mission(prankMission().build());
+                .agent(shrek)
+                .mission(prank);
     }
 
     private AssignmentBuilder keemstarNoChinAssignment() {
+        Agent keemstar = agentKeemstar().build();
+        Mission noChin = noChinMission().build();
+        agentManager.createAgent(keemstar);
+        missionManager.createMission(noChin);
         return new AssignmentBuilder()
                 .id(null)
                 .start(START)
                 .end(END)
-                .agent(agentKeemstar().build())
-                .mission(noChinMission().build());
+                .agent(keemstar)
+                .mission(noChin);
     }
 
     @Test
@@ -108,28 +135,28 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void createAssignmentWithNullStart() {
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(ValidationException.class);
         Assignment assignment = shrekPrankAssignment().start(null).build();
         manager.createAssignment(assignment);
     }
 
     @Test
     public void createAssignmentWithNullEnd() {
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(ValidationException.class);
         Assignment assignment = shrekPrankAssignment().end(null).build();
         manager.createAssignment(assignment);
     }
 
     @Test
     public void createAssignmentWithNullAgent() {
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(ValidationException.class);
         Assignment assignment = shrekPrankAssignment().agent(null).build();
         manager.createAssignment(assignment);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void createAssignmentWithNullMission() {
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(ValidationException.class);
         Assignment assignment = shrekPrankAssignment().mission(null).build();
         manager.createAssignment(assignment);
     }
@@ -160,13 +187,19 @@ public class AssignmentManagerImplTest {
         manager.createAssignment(assignmentToBeUpdated);
         manager.createAssignment(assignmentToBeUnchanged);
 
-        assignmentToBeUpdated.setAgent(agentKeemstar().build());
+        Agent keemstar = agentKeemstar().build();
+        agentManager.createAgent(keemstar);
+
+        assignmentToBeUpdated.setAgent(keemstar);
         manager.updateAssignment(assignmentToBeUpdated);
 
         assertThat(assignmentToBeUpdated)
                 .isEqualToComparingFieldByField(manager.findAssignmentById(assignmentToBeUpdated.getId()));
 
-        assignmentToBeUpdated.setMission(noChinMission().build());
+        Mission noChin = noChinMission().build();
+        missionManager.createMission(noChin);
+
+        assignmentToBeUpdated.setMission(noChin);
         manager.updateAssignment(assignmentToBeUpdated);
         assertThat(assignmentToBeUpdated)
                 .isEqualToComparingFieldByField(manager.findAssignmentById(assignmentToBeUpdated.getId()));
@@ -177,7 +210,6 @@ public class AssignmentManagerImplTest {
                 .isEqualToComparingFieldByField(manager.findAssignmentById(assignmentToBeUpdated.getId()));
 
         assertThat(assignmentToBeUnchanged)
-                .isEqualToComparingFieldByField(keemstarNoChinAssignment().build())
                 .isEqualToComparingFieldByField(manager.findAssignmentById(assignmentToBeUnchanged.getId()));
     }
 

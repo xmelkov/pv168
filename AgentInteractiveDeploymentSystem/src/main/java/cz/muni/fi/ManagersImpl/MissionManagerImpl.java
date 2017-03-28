@@ -29,7 +29,7 @@ public class MissionManagerImpl implements MissionManager {
             Mission mission = new Mission();
             mission.setId(resultSet.getLong("id"));
             mission.setDescription(resultSet.getString("description"));
-            mission.setNumberOfRequiredAgents(resultSet.getShort("gender"));
+            mission.setNumberOfRequiredAgents(resultSet.getShort("numberOfRequiredAgents"));
             mission.setDifficulty(resultSet.getInt("difficulty"));
             mission.setPlace(resultSet.getString("place"));
             mission.setSuccessful(resultSet.getBoolean("successful"));
@@ -81,7 +81,7 @@ public class MissionManagerImpl implements MissionManager {
     @Override
     public void deleteMission(Mission mission) {
         DBUtils.validate(mission);
-        jdbcTemplate.update("DELETE FROM mission where id=?",mission.getId());
+        jdbcTemplate.update("DELETE FROM missions where id=?",mission.getId());
     }
 
     public void setDataSource(DataSource dataSource) {

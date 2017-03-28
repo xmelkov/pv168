@@ -72,6 +72,10 @@ public class DBUtils {
             throw new ValidationException("agent is null");
         }
 
+        if (assignment.getAgent().getId() == null) {
+            throw new ValidationException("agent ID is null");
+        }
+
         if (assignment.getEnd() == null) {
             throw new ValidationException("end of assignment is null");
         }
@@ -86,6 +90,10 @@ public class DBUtils {
 
         if (assignment.getMission() == null) {
             throw new ValidationException("mission is null");
+        }
+
+        if (assignment.getMission().getId() == null) {
+            throw new ValidationException("mission ID is null");
         }
     }
 }
