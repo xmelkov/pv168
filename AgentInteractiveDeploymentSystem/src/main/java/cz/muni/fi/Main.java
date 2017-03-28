@@ -7,6 +7,7 @@ import cz.muni.fi.ManagersImpl.AgentManagerImpl;
 import cz.muni.fi.ManagersImpl.AssignmentManagerImpl;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,19 +24,7 @@ import javax.sql.DataSource;
  */
 public class Main {
     public static void main(String[] args) {
-        /*Properties myconf = new Properties();
-        myconf.load(Main.class.getResourceAsStream("/myconf.properties"));
 
-        BasicDataSource ds = new BasicDataSource();
-        ds.setUrl(myconf.getProperty("jdbc.url"));
-        ds.setUsername(myconf.getProperty("jdbc.user"));
-        ds.setPassword(myconf.getProperty("jdbc.password"));
-
-        AgentManager bookManager = new AgentManagerImpl();
-        bookManager
-
-        List<Agent> allBooks =
-        allBooks.forEach(System.out::println);*/
     }
 
     @Configuration
@@ -47,7 +36,7 @@ public class Main {
 
         @Bean
         public DataSource dataSource() {
-            EmbeddedDataSource ds = new EmbeddedDataSource();
+            BasicDataSource ds = new BasicDataSource();
 
             ds.setDriverClassName(env.getProperty("jdbc.driver"));
             ds.setUrl(env.getProperty("jdbc.url"));

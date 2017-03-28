@@ -39,7 +39,7 @@ public class AgentManagerImpl implements AgentManager{
     @Override
     public void createAgent(Agent agent) throws IllegalArgumentException, ValidationException {
         validate(agent);
-        SimpleJdbcInsert insertCustomer = new SimpleJdbcInsert(jdbcTemplate).withTableName("agents").
+        SimpleJdbcInsert insertAgent = new SimpleJdbcInsert(jdbcTemplate).withTableName("agents").
                 usingGeneratedKeyColumns("id");
 
         SqlParameterSource parameters = new MapSqlParameterSource()
@@ -49,7 +49,7 @@ public class AgentManagerImpl implements AgentManager{
                 .addValue("phoneNumber", agent.getPhoneNumber())
                 .addValue("alive" , agent.isAlive());
 
-        Number id = insertCustomer.executeAndReturnKey(parameters);
+        Number id = insertAgent.executeAndReturnKey(parameters);
         agent.setId(id.longValue());
     }
 
@@ -108,6 +108,7 @@ public class AgentManagerImpl implements AgentManager{
         }
 
         if (agent.getPhoneNumber().isEmpty()) {
+
             throw new ValidationException("phone number is empty");
         }
 
