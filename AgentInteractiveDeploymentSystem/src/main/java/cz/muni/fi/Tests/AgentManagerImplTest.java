@@ -60,10 +60,8 @@ public class AgentManagerImplTest {
 
     @Test
     public void createAgent() throws Exception {
-        assertThat(manager.findAllAgents()).isEmpty();
         Agent agent = agentKeemstar().build();
         manager.createAgent(agent);
-
 
         assertThat(agent.getId()).isEqualTo(1);
 
@@ -134,6 +132,8 @@ public class AgentManagerImplTest {
     public void findAllAgents() throws Exception {
         Agent agentA = agentKeemstar().build();
         manager.createAgent(agentA);
+
+        assertThat(manager.findAllAgents()).containsExactly(agentA);
 
         Agent agentB = agentShrek().build();
         manager.createAgent(agentB);
