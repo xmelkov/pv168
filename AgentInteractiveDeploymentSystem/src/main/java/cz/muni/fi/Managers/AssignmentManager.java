@@ -12,7 +12,7 @@ import java.util.List;
 public interface AssignmentManager {
     void createAssignment(Assignment assignment);
 
-    Assignment findAssignmentById(long assignmentId);
+    Assignment findAssignmentById(Long assignmentId);
 
     List<Assignment> findAllAssignments();
 
