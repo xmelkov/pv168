@@ -3,6 +3,7 @@ package cz.muni.fi.ManagersImpl;
 import cz.muni.fi.Base.Agent;
 import cz.muni.fi.Base.Mission;
 import cz.muni.fi.Managers.MissionManager;
+import cz.muni.fi.common.DBUtils;
 import cz.muni.fi.common.ValidationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -38,7 +39,7 @@ public class MissionManagerImpl implements MissionManager {
 
     @Override
     public void createMission(Mission mission) {
-        validateMission(mission);
+        DBUtils.validate(mission);
         SimpleJdbcInsert insertMission = new SimpleJdbcInsert(jdbcTemplate).withTableName("missions").
                 usingGeneratedKeyColumns("id");
 
@@ -71,8 +72,9 @@ public class MissionManagerImpl implements MissionManager {
 
     @Override
     public void updateMission(Mission mission) {
-        validateMission(mission);
-
+        DBUtils.validate(mission);
+        jdbcTemplate.update("UPDATE missions SET description=?,numberOfRequiredAgents=?,age=?,phoneNumber=?,alive=? WHERE id=?",
+                agent.getName(), agent.getGender(),agent.getAge(),agent.getPhoneNumber(),agent.isAlive(), agent.getId());
     }
 
     @Override
@@ -83,27 +85,6 @@ public class MissionManagerImpl implements MissionManager {
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
-    private void validateMission(Mission mission) {
-        if (mission == null) {
-            throw new IllegalArgumentException("mission is null");
-        }
-        if (mission.getDescription() == null) {
-            throw new ValidationException("mission description is null");
-        }
-        if (mission.getDescription().isEmpty()) {
-            throw new ValidationException("the purpose of the mission is not clear. is there a god?");
-        }
-        if (mission.getNumberOfRequiredAgents() < 1) {
-            throw new ValidationException("mission requires specification of how many agents required");
-        }
-        if (mission.getDifficulty() < 1) {
-            throw new ValidationException("invalid mission difficulty");
-        }
-        if (mission.getPlace() == null) {
-
-        }
     }
 
 }
