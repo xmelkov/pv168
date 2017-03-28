@@ -10,7 +10,7 @@ import java.util.List;
 public interface MissionManager {
     void createMission(Mission mission);
 
-    Mission findMissionById(long missionId);
+    Mission findMissionById(Long missionId);
 
     List<Mission> findAllMissions();
 
