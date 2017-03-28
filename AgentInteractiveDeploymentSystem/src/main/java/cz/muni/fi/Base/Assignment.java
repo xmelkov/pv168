@@ -1,22 +1,23 @@
 package cz.muni.fi.Base;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Created by xmelkov on 8.3.17.
  */
 public class Assignment {
-    private long id;
+    private Long id;
     private LocalDateTime start;
     private LocalDateTime end;
     private Agent agent;
     private Mission mission;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -74,7 +75,7 @@ public class Assignment {
 
         Assignment that = (Assignment) o;
 
-        return id == that.id;
+        return Objects.equals(id, that.id);
     }
 
     @Override
