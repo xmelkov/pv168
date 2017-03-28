@@ -103,15 +103,37 @@ public class AgentManagerImplTest {
         manager.createAgent(null);
     }
 
+    @Test
+    public void findAgentById() {
+        Agent agent = agentKeemstar().build();
+        manager.createAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+    }
+
+    @Test
+    public void findAgentByNullId() {
+        Agent agent = agentKeemstar().build();
+        manager.createAgent(agent);
+        expectedException.expect(IllegalArgumentException.class);
+        manager.findAgentById(null);
+    }
+
+    @Test
+    public void findAllAgentsEmpty() {
+        assertThat(manager.findAllAgents()).isEmpty();
+    }
+
+    @Test
+    public void findAllAgentsNotEmpty() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+        assertThat(manager.findAllAgents()).isNotEmpty();
+    }
 
     @Test
     public void findAllAgents() throws Exception {
-        assertThat(manager.findAllAgents()).isEmpty();
-
         Agent agentA = agentKeemstar().build();
         manager.createAgent(agentA);
-
-        assertThat(manager.findAllAgents()).isNotEmpty();
 
         Agent agentB = agentShrek().build();
         manager.createAgent(agentB);
@@ -122,7 +144,87 @@ public class AgentManagerImplTest {
     }
 
     @Test
-    public void updateAgent() throws Exception {
+    public void updateAgentName() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setName("nameUpdated");
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+    }
+
+    @Test
+    public void updateAgentIncorrectName() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setName("");
+        expectedException.expect(ValidationException.class);
+        manager.updateAgent(agent);
+    }
+
+    @Test
+    public void updateAgentAge() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setAge((short) 44);
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+    }
+
+    @Test
+    public void updateAgentAlive() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setAlive(false);
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+    }
+
+    @Test
+    public void updateAgentPhoneNumber() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setPhoneNumber("777777777");
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+    }
+
+    @Test
+    public void updateAgentIncorrectPhoneNumber() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setPhoneNumber("");
+        expectedException.expect(ValidationException.class);
+        manager.updateAgent(agent);
+    }
+
+    @Test
+    public void updateAgentGender() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setGender((short) 8);
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+    }
+
+    @Test
+    public void updateAgentIncorrectGender() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setGender((short) -3);
+        expectedException.expect(ValidationException.class);
+        manager.updateAgent(agent);
+    }
+
+    @Test
+    public void updateAgentMultipleUpdates() throws Exception {
         Agent agent = agentShrek().build();
         Agent unchangedAgent = agentKeemstar().build();
         manager.createAgent(agent);
@@ -137,6 +239,30 @@ public class AgentManagerImplTest {
         assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
 
         agent.setAge((short) 20);
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+
+        assertThat(unchangedAgent).isEqualToComparingFieldByField(manager.findAgentById(unchangedAgent.getId()));
+    }
+
+    @Test
+    public void updateAgentMultipleIncorrectUpdates() {
+        Agent agent = agentShrek().build();
+        Agent unchangedAgent = agentKeemstar().build();
+        manager.createAgent(agent);
+        manager.createAgent(unchangedAgent);
+
+        expectedException.expect(ValidationException.class);
+        agent.setName("");
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+
+        agent.setPhoneNumber("");
+        manager.updateAgent(agent);
+        assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
+
+
+        agent.setAge((short) -20);
         manager.updateAgent(agent);
         assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
 
