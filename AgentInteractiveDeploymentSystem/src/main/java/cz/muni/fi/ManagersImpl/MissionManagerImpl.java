@@ -71,6 +71,7 @@ public class MissionManagerImpl implements MissionManager {
 
     @Override
     public void updateMission(Mission mission) {
+        validateMission(mission);
 
     }
 
@@ -100,7 +101,9 @@ public class MissionManagerImpl implements MissionManager {
         if (mission.getDifficulty() < 1) {
             throw new ValidationException("invalid mission difficulty");
         }
-        if (mission.getPlace() == null)
+        if (mission.getPlace() == null) {
+
+        }
     }
 
 }
