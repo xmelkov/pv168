@@ -73,8 +73,9 @@ public class MissionManagerImpl implements MissionManager {
     @Override
     public void updateMission(Mission mission) {
         DBUtils.validate(mission);
-        jdbcTemplate.update("UPDATE missions SET description=?,numberOfRequiredAgents=?,age=?,phoneNumber=?,alive=? WHERE id=?",
-                agent.getName(), agent.getGender(),agent.getAge(),agent.getPhoneNumber(),agent.isAlive(), agent.getId());
+        jdbcTemplate.update("UPDATE missions SET description=?,numberOfRequiredAgents=?,difficulty=?,place=?," +
+                "successful=? WHERE id=?", mission.getDescription(),mission.getNumberOfRequiredAgents(),
+                mission.getDifficulty(),mission.getPlace(), mission.isSuccessful(),mission.getId());
     }
 
     @Override
