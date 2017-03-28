@@ -80,7 +80,8 @@ public class MissionManagerImpl implements MissionManager {
 
     @Override
     public void deleteMission(Mission mission) {
-
+        DBUtils.validate(mission);
+        jdbcTemplate.update("DELETE FROM mission where id=?",mission.getId());
     }
 
     public void setDataSource(DataSource dataSource) {
