@@ -6,6 +6,9 @@ import cz.muni.fi.Base.Mission;
 import cz.muni.fi.Managers.AgentManager;
 import cz.muni.fi.Managers.AssignmentManager;
 import cz.muni.fi.Managers.MissionManager;
+import cz.muni.fi.common.DBUtils;
+import cz.muni.fi.common.IllegalEntityException;
+import cz.muni.fi.common.ValidationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -57,6 +60,7 @@ public class AssignmentManagerImpl implements AssignmentManager {
 
     @Override
     public void createAssignment(Assignment assignment) {
+        DBUtils.validate(assignment);
         SimpleJdbcInsert insertAssignment = new SimpleJdbcInsert(jdbcTemplate).withTableName("assignments").
                 usingGeneratedKeyColumns("id");
         SqlParameterSource parameters = new MapSqlParameterSource()
@@ -70,8 +74,13 @@ public class AssignmentManagerImpl implements AssignmentManager {
     }
 
     @Override
-    public Assignment findAssignmentById(long assignmentId) {
-        return jdbcTemplate.queryForObject("SELECT * FROM assignments WHERE id=?", assignmentMapper, assignmentId);
+    public Assignment findAssignmentById(Long assignmentId) {
+        if (assignmentId == null) { throw new IllegalArgumentException("assignment id is null"); }
+        try {
+            return jdbcTemplate.queryForObject("SELECT * FROM assignments WHERE id=?", assignmentMapper, assignmentId);
+        } catch (org.springframework.dao.DataAccessException ex) {
+            return null;
+        }
     }
 
     @Override
@@ -81,6 +90,7 @@ public class AssignmentManagerImpl implements AssignmentManager {
 
     @Override
     public void updateAssignment(Assignment assignment) {
+        DBUtils.validate(assignment);
         jdbcTemplate.update("UPDATE assignments SET start=?, end=?, agentId=?, missionId=? WHERE id=?",
                 assignmentMapper, toSQLTimestamp(assignment.getStart()), toSQLTimestamp(assignment.getEnd()),
                 assignment.getAgent().getId(), assignment.getMission().getId(),assignment.getId());
@@ -88,22 +98,31 @@ public class AssignmentManagerImpl implements AssignmentManager {
 
     @Override
     public void deleteAssignment(Assignment assignment) {
+        DBUtils.validate(assignment);
         jdbcTemplate.update("DELETE FROM assignments WHERE id=?", assignmentMapper, assignment.getId());
     }
 
     @Override
     public List<Assignment> findAllAssignmentsForMission(Mission mission) {
-        return jdbcTemplate.query("SELECT * FROM assignments WHERE missionId=?", assignmentMapper, mission.getId());
+        DBUtils.validate(mission);
+        try {
+            return jdbcTemplate.query("SELECT * FROM assignments WHERE missionId=?", assignmentMapper, mission.getId());
+        } catch (org.springframework.dao.DataAccessException ex) {
+            throw new IllegalEntityException("Mission" + mission + "doesn't exist in database.");
+        }
     }
 
     @Override
     public List<Assignment> findAllAssignmentsForAgent(Agent agent) {
-        return jdbcTemplate.query("SELECT * FROM assignments WHERE agentId=?", assignmentMapper, agent.getId());
+        DBUtils.validate(agent);
+        try {
+            return jdbcTemplate.query("SELECT * FROM assignments WHERE agentId=?", assignmentMapper, agent.getId());
+        } catch (org.springframework.dao.DataAccessException ex) {
+            throw new IllegalEntityException("Agent" + agent + "doesn't exist in database.");
+        }
     }
 
-    public void setAgentManager(AgentManager agentManager) {
-        this.agentManager = agentManager;
-    }
+    public void setAgentManager(AgentManager agentManager) { this.agentManager = agentManager; }
 
     public void setMissionManager(MissionManager missionManager) {
         this.missionManager = missionManager;
@@ -117,6 +136,5 @@ public class AssignmentManagerImpl implements AssignmentManager {
     private Timestamp toSQLTimestamp(LocalDateTime localDateTime) {
         if (localDateTime == null) return null;
         return new Timestamp(ZonedDateTime.of(localDateTime, ZoneId.systemDefault()).toInstant().toEpochMilli());
-
     }
 }
