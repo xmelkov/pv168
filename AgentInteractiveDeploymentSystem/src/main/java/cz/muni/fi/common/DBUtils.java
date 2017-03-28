@@ -39,6 +39,27 @@ public class DBUtils {
     }
 
     public static void validate(Mission mission) throws IllegalArgumentException, ValidationException{
+        if (mission == null) {
+            throw new IllegalArgumentException("mission is null");
+        }
+        if (mission.getDescription() == null) {
+            throw new ValidationException("mission description is null");
+        }
+        if (mission.getDescription().isEmpty()) {
+            throw new ValidationException("the purpose of the mission is not clear. is there a god? what is life?");
+        }
+        if (mission.getNumberOfRequiredAgents() < 1) {
+            throw new ValidationException("mission requires specification of how many agents required");
+        }
+        if (mission.getDifficulty() < 1) {
+            throw new ValidationException("invalid mission difficulty");
+        }
+        if (mission.getPlace() == null) {
+            throw new ValidationException("place of teh mission is null");
+        }
+        if (mission.getPlace().isEmpty()) {
+            throw new ValidationException("place of the mission is empty. not sure where agent should go");
+        }
 
     }
 
