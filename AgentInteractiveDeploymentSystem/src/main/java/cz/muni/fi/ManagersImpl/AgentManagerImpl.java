@@ -2,6 +2,7 @@ package cz.muni.fi.ManagersImpl;
 
 import cz.muni.fi.Base.Agent;
 import cz.muni.fi.Managers.AgentManager;
+import cz.muni.fi.common.DBUtils;
 import cz.muni.fi.common.ValidationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -38,8 +39,8 @@ public class AgentManagerImpl implements AgentManager{
 
     @Override
     public void createAgent(Agent agent) throws IllegalArgumentException, ValidationException {
-        validate(agent);
-        SimpleJdbcInsert insertAgent = new SimpleJdbcInsert(jdbcTemplate).withTableName("agents").
+        DBUtils.validate(agent);
+        SimpleJdbcInsert insertCustomer = new SimpleJdbcInsert(jdbcTemplate).withTableName("agents").
                 usingGeneratedKeyColumns("id");
 
         SqlParameterSource parameters = new MapSqlParameterSource()
@@ -49,7 +50,7 @@ public class AgentManagerImpl implements AgentManager{
                 .addValue("phoneNumber", agent.getPhoneNumber())
                 .addValue("alive" , agent.isAlive());
 
-        Number id = insertAgent.executeAndReturnKey(parameters);
+        Number id = insertCustomer.executeAndReturnKey(parameters);
         agent.setId(id.longValue());
     }
 
@@ -70,50 +71,19 @@ public class AgentManagerImpl implements AgentManager{
 
     @Override
     public void updateAgent(Agent agent) throws IllegalArgumentException, ValidationException{
-        validate(agent);
+        DBUtils.validate(agent);
         jdbcTemplate.update("UPDATE agents SET name=?,gender=?,age=?,phoneNumber=?,alive=? WHERE id=?",
                 agent.getName(), agent.getGender(),agent.getAge(),agent.getPhoneNumber(),agent.isAlive(), agent.getId());
     }
 
     @Override
     public void deleteAgent(Agent agent) throws IllegalArgumentException, ValidationException {
-        validate(agent);
+        DBUtils.validate(agent);
         jdbcTemplate.update("DELETE FROM agents where id=?",agent.getId());
     }
 
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
-    private void validate(Agent agent) throws IllegalArgumentException, ValidationException {
-        if (agent == null) {
-            throw new IllegalArgumentException("agent is null");
-        }
-
-        if (agent.getName() == null) {
-            throw new ValidationException("name is null");
-        }
-
-        if (agent.getAge() < 18) {
-            throw new ValidationException("agent age is under 18");
-        }
-
-        if (agent.getGender() < 0) {
-            throw new ValidationException("gender is negative");
-        }
-
-        if (agent.getPhoneNumber() == null) {
-            throw new ValidationException("phone number is null");
-        }
-
-        if (agent.getPhoneNumber().isEmpty()) {
-
-            throw new ValidationException("phone number is empty");
-        }
-
-        if (agent.getName().isEmpty()) {
-            throw new ValidationException("name is empty");
-        }
     }
 }
