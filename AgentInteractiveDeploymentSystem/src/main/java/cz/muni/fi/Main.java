@@ -7,8 +7,10 @@ import cz.muni.fi.ManagersImpl.AgentManagerImpl;
 import cz.muni.fi.ManagersImpl.AssignmentManagerImpl;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
 
+import cz.muni.fi.common.DBUtils;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.assertj.core.util.Compatibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

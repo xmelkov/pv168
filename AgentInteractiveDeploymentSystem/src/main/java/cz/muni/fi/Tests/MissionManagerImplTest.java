@@ -168,6 +168,24 @@ public class MissionManagerImplTest {
         manager.findMissionById(null);
     }
 
+    @Test
+    public void findAgentWithNoExistingIdWhichShouldReturnNullCauseAgentDoesNotExistsWhatIsDeadMayNeverDieTheonGreyjoy() {
+        Mission mission = chromosomeMission().build();
+        manager.createMission(mission);
+        assertNull(manager.findMissionById(mission.getId() + 1));
+    }
+
+    @Test
+    public void findAllAgentsEmpty() {
+        assertTrue(manager.findAllMissions().isEmpty());
+    }
+
+    @Test
+    public void findAllAgentsNotEmptyBecauseNaoItShouldContainAnEntryThusMakingItNotEmptyAndNotEmptyGetIt () {
+
+    }
+
+
 /*
     @Test
     public void updateMission() throws Exception {

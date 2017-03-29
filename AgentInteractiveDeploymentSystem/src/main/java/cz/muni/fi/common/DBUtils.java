@@ -33,8 +33,17 @@ public class DBUtils {
             throw new ValidationException("phone number is empty");
         }
 
+        if (!validatePhoneNumber(agent.getPhoneNumber())) {
+            throw new ValidationException("invalid phone number entered. phone number can consist of digits, white " +
+                    "spaces and + in the beginning only");
+        }
+
         if (agent.getName().isEmpty()) {
             throw new ValidationException("name is empty");
+        }
+
+        if (!validateName(agent.getName())) {
+            throw new ValidationException("Agent has rather interesting name");
         }
     }
 
@@ -95,5 +104,13 @@ public class DBUtils {
         if (assignment.getMission().getId() == null) {
             throw new ValidationException("mission ID is null");
         }
+    }
+
+    private static boolean validateName(String name) {
+        return name.matches("^[\\sa-zA-Z]+$");
+    }
+
+    private static boolean validatePhoneNumber(String phoneNumber) {
+        return phoneNumber.matches("^\\s*\\+?\\s*[\\d\\s]+$");
     }
 }

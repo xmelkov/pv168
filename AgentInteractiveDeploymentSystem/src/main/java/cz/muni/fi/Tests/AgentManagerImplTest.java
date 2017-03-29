@@ -148,7 +148,7 @@ public class AgentManagerImplTest {
         Agent agent = agentShrek().build();
         manager.createAgent(agent);
 
-        agent.setName("nameUpdated");
+        agent.setName("dunkei");
         manager.updateAgent(agent);
         assertThat(agent).isEqualToComparingFieldByField(manager.findAgentById(agent.getId()));
     }
