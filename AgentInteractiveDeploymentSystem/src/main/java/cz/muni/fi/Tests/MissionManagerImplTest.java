@@ -169,68 +169,93 @@ public class MissionManagerImplTest {
     }
 
     @Test
-    public void findAgentWithNoExistingIdWhichShouldReturnNullCauseAgentDoesNotExistsWhatIsDeadMayNeverDieTheonGreyjoy() {
+    public void findMissionWithNoExistingIdWhichShouldReturnNullCauseMissionDoesNotExistsWhatIsDeadMayNeverDieTheonGreyjoy() {
         Mission mission = chromosomeMission().build();
         manager.createMission(mission);
         assertNull(manager.findMissionById(mission.getId() + 1));
     }
 
     @Test
-    public void findAllAgentsEmpty() {
+    public void findAllMissionsEmpty() {
         assertTrue(manager.findAllMissions().isEmpty());
     }
 
     @Test
-    public void findAllAgentsNotEmptyBecauseNaoItShouldContainAnEntryThusMakingItNotEmptyAndNotEmptyGetIt () {
-
-    }
-
-
-/*
-    @Test
-    public void updateMission() throws Exception {
-        Mission missionToBeUpdated = noChinMission().build();
-        Mission missionToBeUnchanged = noChinMission().build();
-
-        manager.createMission(missionToBeUpdated);
-        manager.createMission(missionToBeUnchanged);
-
-        assertThat(manager.findAllMissions().size()).isEqualTo(2);
-
-        missionToBeUpdated.setDescription("Hey thats pretty good!");
-        manager.updateMission(missionToBeUpdated);
-
-        assertThat(missionToBeUpdated)
-                .isEqualToComparingFieldByField(manager.findMissionById(missionToBeUpdated.getId()));
-
-        missionToBeUpdated.setPlace("Afghanistan");
-        manager.updateMission(missionToBeUpdated);
-
-        assertThat(missionToBeUpdated)
-                .isEqualToComparingFieldByField(manager.findMissionById(missionToBeUpdated.getId()));
-        assertThat(missionToBeUnchanged)
-                .isEqualToComparingFieldByField(manager.findMissionById(missionToBeUnchanged.getId()))
-                .isEqualToComparingFieldByField(noChinMission().id(missionToBeUnchanged.getId()).build());
+    public void findAllMissionsNotEmptyBecauseNaoItShouldContainAnEntryThusMakingItNotEmptyAndNotEmptyGetIt () {
+        Mission mission = prankMission().build();
+        manager.createMission(mission);
+        assertFalse(manager.findAllMissions().isEmpty());
     }
 
     @Test
-    public void deleteMission() throws Exception {
-        Mission missionToBeDeleted = prankMission().build();
-        Mission missionToBeUnchanged = noChinMission().build();
+    public void findAllMissionActuallyFindsAllMissionsCauseThatsWhatTheNameSays () {
+        Mission mission1 = prankMission().build();
+        Mission mission2 = pizzaInvestigation().build();
+        Mission mission3 = noChinMission().build();
 
-        manager.createMission(missionToBeDeleted);
-        manager.createMission(missionToBeUnchanged);
+        manager.createMission(mission1);
+        assertThat(manager.findAllMissions()).containsExactly(mission1);
 
-        assertThat(manager.findAllMissions())
-                .usingFieldByFieldElementComparator()
-                .containsOnly(missionToBeDeleted, missionToBeUnchanged);
+        manager.createMission(mission2);
         assertThat(manager.findAllMissions().size()).isEqualTo(2);
+        assertThat(manager.findAllMissions()).usingFieldByFieldElementComparator().containsOnly(mission1,mission2);
 
-        manager.deleteMission(missionToBeDeleted);
+        manager.createMission(mission3);
+        assertThat(manager.findAllMissions().size()).isEqualTo(3);
+        assertThat(manager.findAllMissions()).usingFieldByFieldElementComparator()
+                .containsOnly(mission1,mission2,mission3);
+    }
 
-        assertThat(manager.findAllMissions())
-                .usingFieldByFieldElementComparator()
-                .containsOnly(missionToBeUnchanged);
-        assertThat(manager.findAllMissions().size()).isEqualTo(1);
-    }*/
+    @Test
+    public void updateDescription() {
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        mission.setDescription("Arrest Calvin Vail for cyber-bullying");
+        manager.updateMission(mission);
+        assertThat(mission).isEqualToComparingFieldByField(manager.findMissionById(mission.getId()));
+    }
+
+    @Test
+    public void updateNumberOfRequiredAgents() {
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        short newNumberOfRequiredAgents = mission.getNumberOfRequiredAgents();
+        newNumberOfRequiredAgents += 2;
+        mission.setNumberOfRequiredAgents(newNumberOfRequiredAgents);
+        manager.updateMission(mission);
+        assertThat(mission).isEqualToComparingFieldByField(manager.findMissionById(mission.getId()));
+    }
+
+    @Test
+    public void updateDifficulty() {
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        mission.setDifficulty(55);
+        manager.updateMission(mission);
+        assertThat(mission).isEqualToComparingFieldByField(manager.findMissionById(mission.getId()));
+    }
+
+    @Test
+    public void updatePlace() {
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        mission.setPlace("Goldshire, Lyo's pride inn, Elwynn Forest");
+        manager.updateMission(mission);
+        assertThat(mission).isEqualToComparingFieldByField(manager.findMissionById(mission.getId()));
+    }
+
+    @Test
+    public void updateSuccessful() {
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        mission.setSuccessful(!mission.isSuccessful());
+        manager.updateMission(mission);
+        assertThat(mission).isEqualToComparingFieldByField(manager.findMissionById(mission.getId()));
+    }
+
 }

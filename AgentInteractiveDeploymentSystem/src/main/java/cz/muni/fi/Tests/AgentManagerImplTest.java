@@ -12,6 +12,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertNull;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 
 
@@ -114,6 +115,13 @@ public class AgentManagerImplTest {
         manager.createAgent(agent);
         expectedException.expect(IllegalArgumentException.class);
         manager.findAgentById(null);
+    }
+
+    @Test
+    public void findNonExistingAgent() {
+        Agent agent = agentKeemstar().build();
+        manager.createAgent(agent);
+        assertNull(manager.findAgentById(agent.getId() + 1));
     }
 
     @Test
