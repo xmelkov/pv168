@@ -13,6 +13,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 
 
@@ -81,12 +82,25 @@ public class AgentManagerImplTest {
     }
 
     @Test
+    public void createAgentWithIncorrenctName() {
+        Agent agent = agentKeemstar().name("francis 6969 of the filth").build();
+        expectedException.expect(ValidationException.class);
+        manager.createAgent(agent);
+    }
+
+    @Test
     public void createAgentWithoutPhoneNumber() {
         Agent agent = agentShrek().phoneNumber("").build();
         expectedException.expect(ValidationException.class);
         manager.createAgent(agent);
     }
 
+    @Test
+    public void createAgentWithIncorrectPhoneNumber() {
+        Agent agent = agentShrek().phoneNumber("+ 1245 haircake 6789").build();
+        expectedException.expect(ValidationException.class);
+        manager.createAgent(agent);
+    }
 
     @Test
     public void createAgentUnderAge() {
@@ -162,11 +176,21 @@ public class AgentManagerImplTest {
     }
 
     @Test
-    public void updateAgentIncorrectName() {
+    public void updateAgentEmptyName() {
         Agent agent = agentShrek().build();
         manager.createAgent(agent);
 
         agent.setName("");
+        expectedException.expect(ValidationException.class);
+        manager.updateAgent(agent);
+    }
+
+    @Test
+    public void updateAgentWeirdName() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setName("KFBR372");
         expectedException.expect(ValidationException.class);
         manager.updateAgent(agent);
     }
@@ -202,11 +226,21 @@ public class AgentManagerImplTest {
     }
 
     @Test
-    public void updateAgentIncorrectPhoneNumber() {
+    public void updateAgentEmptyPhoneNumber() {
         Agent agent = agentShrek().build();
         manager.createAgent(agent);
 
         agent.setPhoneNumber("");
+        expectedException.expect(ValidationException.class);
+        manager.updateAgent(agent);
+    }
+
+    @Test
+    public void updateAgentIncorrectPhoneNumber() {
+        Agent agent = agentShrek().build();
+        manager.createAgent(agent);
+
+        agent.setPhoneNumber(" + 421 asdfmovie 800 666 6969");
         expectedException.expect(ValidationException.class);
         manager.updateAgent(agent);
     }
@@ -302,5 +336,48 @@ public class AgentManagerImplTest {
         assertThat(manager.findAllAgents())
                 .usingFieldByFieldElementComparator()
                 .containsOnly(agentUnchanged);
+    }
+
+    @Test
+    public void deleteFromEmpty() {
+        Agent agent = agentKeemstar().build();
+        assertTrue(manager.findAllAgents().isEmpty());
+        manager.deleteAgent(agent);
+        assertTrue(manager.findAllAgents().isEmpty());
+    }
+
+    @Test
+    public void deleteNonExistingagent() {
+        Agent saved = agentKeemstar().build();
+        manager.createAgent(saved);
+
+        Agent unsaved = agentShrek().build();
+        assertThat(manager.findAllAgents().size()).isEqualTo(1);
+        assertThat(manager.findAllAgents())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(saved);
+
+        manager.deleteAgent(unsaved);
+        assertThat(manager.findAllAgents().size()).isEqualTo(1);
+        assertThat(manager.findAllAgents())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(saved);
+    }
+
+    @Test
+    public void deleteLast() {
+        Agent agentToBeDeleted = agentKeemstar().build();
+        manager.createAgent(agentToBeDeleted);
+
+        assertThat(manager.findAllAgents().size()).isEqualTo(1);
+
+        manager.deleteAgent(agentToBeDeleted);
+        assertTrue(manager.findAllAgents().isEmpty());
+    }
+
+    @Test
+    public void deleteNull() {
+        expectedException.expect(IllegalArgumentException.class);
+        manager.deleteAgent(null);
     }
 }
