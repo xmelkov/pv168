@@ -12,8 +12,6 @@ import org.junit.rules.ExpectedException;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
-import java.util.List;
-
 import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
@@ -217,15 +215,23 @@ public class MissionManagerImplTest {
     }
 
     @Test
-    public void updateNumberOfRequiredAgents() {
+    public void updateEmptyDescription() {
         Mission mission = noChinMission().build();
         manager.createMission(mission);
 
-        short newNumberOfRequiredAgents = mission.getNumberOfRequiredAgents();
-        newNumberOfRequiredAgents += 2;
-        mission.setNumberOfRequiredAgents(newNumberOfRequiredAgents);
+        expectedException.expect(ValidationException.class);
+        mission.setDescription("");
         manager.updateMission(mission);
-        assertThat(mission).isEqualToComparingFieldByField(manager.findMissionById(mission.getId()));
+    }
+
+    @Test
+    public void updateNegativeNumberOfRequiredAgents() {
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        expectedException.expect(ValidationException.class);
+        mission.setNumberOfRequiredAgents((short)-(mission.getNumberOfRequiredAgents()));
+        manager.updateMission(mission);
     }
 
     @Test
@@ -239,6 +245,16 @@ public class MissionManagerImplTest {
     }
 
     @Test
+    public void updateNegativeDifficulty() {
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        expectedException.expect(ValidationException.class);
+        mission.setDifficulty(-1);
+        manager.updateMission(mission);
+    }
+
+    @Test
     public void updatePlace() {
         Mission mission = noChinMission().build();
         manager.createMission(mission);
@@ -246,6 +262,16 @@ public class MissionManagerImplTest {
         mission.setPlace("Goldshire, Lyo's pride inn, Elwynn Forest");
         manager.updateMission(mission);
         assertThat(mission).isEqualToComparingFieldByField(manager.findMissionById(mission.getId()));
+    }
+
+    @Test
+    public void updateEmptyPlace() {
+        Mission mission = noChinMission().build();
+        manager.createMission(mission);
+
+        expectedException.expect(ValidationException.class);
+        mission.setPlace("");
+        manager.updateMission(mission);
     }
 
     @Test
@@ -257,5 +283,76 @@ public class MissionManagerImplTest {
         manager.updateMission(mission);
         assertThat(mission).isEqualToComparingFieldByField(manager.findMissionById(mission.getId()));
     }
+
+    @Test
+    public void updateNullMission() {
+        expectedException.expect(IllegalArgumentException.class);
+        manager.updateMission(null);
+    }
+
+    @Test
+    public void deleteMission() {
+        Mission missionToBeDeleted = pizzaInvestigation().build();
+        Mission missionUnchanged = chromosomeMission().build();
+
+        manager.createMission(missionToBeDeleted);
+        manager.createMission(missionUnchanged);
+
+        assertThat(manager.findAllMissions().size()).isEqualTo(2);
+        assertThat(manager.findAllMissions())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(missionToBeDeleted,missionUnchanged);
+
+        manager.deleteMission(missionToBeDeleted);
+
+        assertThat(manager.findAllMissions().size()).isEqualTo(1);
+        assertThat(manager.findAllMissions())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(missionUnchanged);
+    }
+
+    @Test
+    public void deleteFromEmpty() {
+        Mission mission = pizzaInvestigation().build();
+        assertTrue(manager.findAllMissions().isEmpty());
+        manager.deleteMission(mission);
+        assertTrue(manager.findAllMissions().isEmpty());
+    }
+
+    @Test
+    public void deleteNonExistingMission() {
+        Mission saved = chromosomeMission().build();
+        manager.createMission(saved);
+
+        Mission unsaved = noChinMission().build();
+        assertThat(manager.findAllMissions().size()).isEqualTo(1);
+        assertThat(manager.findAllMissions())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(saved);
+
+        manager.deleteMission(unsaved);
+        assertThat(manager.findAllMissions().size()).isEqualTo(1);
+        assertThat(manager.findAllMissions())
+                .usingFieldByFieldElementComparator()
+                .containsOnly(saved);
+    }
+
+    @Test
+    public void deleteLast() {
+        Mission missionToBeDeleted = pizzaInvestigation().build();
+        manager.createMission(missionToBeDeleted);
+
+        assertThat(manager.findAllMissions().size()).isEqualTo(1);
+
+        manager.deleteMission(missionToBeDeleted);
+        assertTrue(manager.findAllMissions().isEmpty());
+    }
+
+    @Test
+    public void deleteNull() {
+        expectedException.expect(IllegalArgumentException.class);
+        manager.deleteMission(null);
+    }
+
 
 }
