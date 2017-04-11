@@ -1,20 +1,19 @@
 package cz.muni.fi;
 
-import cz.muni.fi.Managers.AgentManager;
-import cz.muni.fi.Managers.AssignmentManager;
-import cz.muni.fi.Managers.MissionManager;
 import cz.muni.fi.ManagersImpl.AgentManagerImpl;
 import cz.muni.fi.ManagersImpl.AssignmentManagerImpl;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
-
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.derby.jdbc.EmbeddedDataSource;
+import org.apache.derby.jdbc.EmbeddedDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -25,6 +24,19 @@ import javax.sql.DataSource;
 public class Main {
     public static void main(String[] args) {
 
+    }
+
+    public static DataSource createMemoryDatabase() {
+        BasicDataSource bds = new BasicDataSource();
+        //set JDBC driver and URL
+        bds.setDriverClassName(EmbeddedDriver.class.getName());
+        bds.setUrl("jdbc:derby:memory:booksDB;create=true");
+        //populate db with tables and data
+        DatabasePopulatorUtils.execute(new ResourceDatabasePopulator(
+                new ClassPathResource("my-schema.sql"),
+                new ClassPathResource("test-data.sql")), bds);
+
+        return bds;
     }
 
     @Configuration
@@ -44,6 +56,8 @@ public class Main {
             ds.setPassword(env.getProperty("jdbc.password"));
             return ds;
         }
+
+
 
         @Bean
         public PlatformTransactionManager transactionManager() {

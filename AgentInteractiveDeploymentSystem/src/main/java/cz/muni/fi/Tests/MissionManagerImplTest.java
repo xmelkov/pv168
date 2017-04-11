@@ -62,11 +62,8 @@ public class MissionManagerImplTest {
 
     @Test
     public void createMission() throws Exception {
-        assertThat(manager.findAllMissions()).isEmpty();
         Mission mission = noChinMission().build();
         manager.createMission(mission);
-
-        assertThat(manager.findAllMissions()).isNotEmpty();
 
         assertThat(mission.getId()).isEqualTo(1);
 
