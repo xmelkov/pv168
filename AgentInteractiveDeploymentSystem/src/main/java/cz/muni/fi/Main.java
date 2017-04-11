@@ -57,8 +57,6 @@ public class Main {
             return ds;
         }
 
-
-
         @Bean
         public PlatformTransactionManager transactionManager() {
             return new DataSourceTransactionManager(dataSource());
