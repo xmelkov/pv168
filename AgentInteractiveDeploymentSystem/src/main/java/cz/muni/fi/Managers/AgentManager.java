@@ -1,6 +1,7 @@
 package cz.muni.fi.Managers;
 
 import cz.muni.fi.Base.Agent;
+
 import java.util.List;
 
 /**

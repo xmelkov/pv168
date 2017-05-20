@@ -1,10 +1,8 @@
 package cz.muni.fi.ManagersImpl;
 
-import cz.muni.fi.Base.Agent;
 import cz.muni.fi.Base.Mission;
 import cz.muni.fi.Managers.MissionManager;
 import cz.muni.fi.common.DBUtils;
-import cz.muni.fi.common.ValidationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;

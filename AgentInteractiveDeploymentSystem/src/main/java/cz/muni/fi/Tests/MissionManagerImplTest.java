@@ -1,6 +1,5 @@
 package cz.muni.fi.Tests;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import cz.muni.fi.Base.Mission;
 import cz.muni.fi.ManagersImpl.MissionManagerImpl;
 import cz.muni.fi.common.ValidationException;
@@ -12,8 +11,8 @@ import org.junit.rules.ExpectedException;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
-import static org.assertj.core.api.Assertions.*;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 
 /**

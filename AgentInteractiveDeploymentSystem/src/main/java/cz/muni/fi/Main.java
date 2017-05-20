@@ -17,20 +17,27 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Created by xmelkov on 8.3.17.
  */
 public class Main {
     public static void main(String[] args) {
-
+        EventQueue.invokeLater(() -> {
+            JFrame frame = new JFrame();
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setTitle("Moje první okno");
+            frame.setVisible(true);
+        });
     }
 
     public static DataSource createMemoryDatabase() {
         BasicDataSource bds = new BasicDataSource();
         //set JDBC driver and URL
         bds.setDriverClassName(EmbeddedDriver.class.getName());
-        bds.setUrl("jdbc:derby:memory:booksDB;create=true");
+        bds.setUrl("jdbc:derby:memory:agentsDB;create=true");
         //populate db with tables and data
         DatabasePopulatorUtils.execute(new ResourceDatabasePopulator(
                 new ClassPathResource("my-schema.sql"),
